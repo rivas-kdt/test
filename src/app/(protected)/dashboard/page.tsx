@@ -24,6 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useSession } from "@/features/auth/hooks/sessionProvider";
+// import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useTransaction } from "@/features/dashboard/hooks/useDashboardHooks";
 import { useShip } from "@/features/dashboard/hooks/useShip";
 import { useStock } from "@/features/dashboard/hooks/useStock";
@@ -36,6 +38,7 @@ import {
   Warehouse,
   AlertCircle,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Bar,
   BarChart,
@@ -47,7 +50,20 @@ import {
 } from "recharts";
 
 export default function Home() {
-  const { transactionLoading, monthly } = useTransaction();
+  const t = useTranslations("DashboardPage");
+  const { user } = useSession();
+
+  console.log(user);
+
+  const {
+    transactionLoading,
+    monthly,
+    totalLoading,
+    total,
+    totalError,
+    totalPctChange,
+  } = useTransaction();
+
   const {
     shippedThisMonth,
     shippedPercentageChange,
@@ -82,30 +98,67 @@ export default function Home() {
     },
   } satisfies ChartConfig;
 
+  console.log(total);
+
   return (
     <main className="space-y-2 flex flex-col p-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         {/* Total Record */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-primary">Total Record</CardTitle>
+            <CardTitle className="text-primary">{t("totalRecorded")}</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-between items-center">
-            <div className="text-4xl font-bold">2500</div>
+            {totalLoading ? (
+              <Skeleton className="h-[60px] w-full" />
+            ) : totalError ? (
+              <p className="text-destructive flex items-center gap-2">
+                {/* TRANSLATEME Create translation for this */}
+                <AlertCircle size={18} /> Failed to load total data
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-col">
+                  <p className="text-4xl font-bold">{total}</p>
+                  {totalPctChange != null && (
+                    <div className="flex gap-1 items-end">
+                      {shippedPercentageChange > 0 ? (
+                        <>
+                          <TrendingUp className="text-green-500 h-5 w-5" />
+                          <p className="text-base text-green-500">
+                            {`${totalPctChange}%`}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <TrendingDown className="text-destructive h-5 w-5" />
+                          <p className="text-md text-destructive">
+                            {`${Math.abs(totalPctChange)}%`}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
             <Warehouse className="h-12 w-12 text-primary" />
+            {/* <div className="text-4xl font-bold">{total}</div> */}
+            {/* <Warehouse className="h-12 w-12 text-primary" /> */}
           </CardContent>
         </Card>
 
         {/* Shipped Parts */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-primary">Shipped Parts</CardTitle>
+            <CardTitle className="text-primary">{t("shippedParts")}</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-between items-center">
             {shippedLoading ? (
               <Skeleton className="h-[60px] w-full" />
             ) : shippedError ? (
               <p className="text-destructive flex items-center gap-2">
+                {/* TRANSLATEME Create translation for this */}
                 <AlertCircle size={18} /> Failed to load shipped data
               </p>
             ) : (
@@ -132,22 +185,23 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <Truck className="h-12 w-12 text-primary" />
               </>
             )}
+            <Truck className="h-12 w-12 text-primary" />
           </CardContent>
         </Card>
 
         {/* Stocked Parts */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-primary">Stocked Parts</CardTitle>
+            <CardTitle className="text-primary">{t("stockedParts")}</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-between items-center">
             {stockedLoading ? (
               <Skeleton className="h-[60px] w-full" />
             ) : stockedError ? (
               <p className="text-destructive flex items-center gap-2">
+                {/* TRANSLATEME Create translation for this */}
                 <AlertCircle size={18} /> Failed to load stocked data
               </p>
             ) : (
@@ -174,9 +228,9 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <Package className="h-12 w-12 text-primary" />
               </>
             )}
+            <Package className="h-12 w-12 text-primary" />
           </CardContent>
         </Card>
       </div>
@@ -274,10 +328,12 @@ export default function Home() {
         <Card className="h-full flex flex-col">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-primary">Recent Stocked</CardTitle>
+              <CardTitle className="text-primary">
+                {t("recentStocked")}
+              </CardTitle>
             </div>
             <CardDescription className="text-foreground">
-              Latest stocked transactions
+              {t("desc1")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto">
@@ -285,17 +341,18 @@ export default function Home() {
               <Skeleton className="h-[calc(19vh-80px)] w-full" />
             ) : recentStockedError ? (
               <p className="text-destructive flex items-center gap-2">
+                {/* TRANSLATEME Create translation for this */}
                 <AlertCircle size={18} /> Failed to load stocked list
               </p>
             ) : (
               <Table className="min-w-full table-auto">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>lotNo</TableHead>
-                    <TableHead>prodCode</TableHead>
-                    <TableHead>stockNo</TableHead>
-                    <TableHead>quantity</TableHead>
-                    <TableHead>date</TableHead>
+                    <TableHead>{t("lotNo")}</TableHead>
+                    <TableHead>{t("prodCode")}</TableHead>
+                    <TableHead>{t("stockNo")}</TableHead>
+                    <TableHead>{t("quantity")}</TableHead>
+                    <TableHead>{t("date")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -322,10 +379,12 @@ export default function Home() {
         <Card className="h-full flex flex-col">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-primary">Recent Shipped</CardTitle>
+              <CardTitle className="text-primary">
+                {t("recentShipped")}
+              </CardTitle>
             </div>
             <CardDescription className="text-foreground">
-              Latest shipped transactions
+              {t("desc2")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto">
@@ -333,17 +392,18 @@ export default function Home() {
               <Skeleton className="h-[calc(19vh-80px)] w-full" />
             ) : recentShippedError ? (
               <p className="text-destructive flex items-center gap-2">
+                {/* TRANSLATEME Create translation for this */}
                 <AlertCircle size={18} /> Failed to load shipped list
               </p>
             ) : (
               <Table className="min-w-full table-auto">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>lotNo</TableHead>
-                    <TableHead>prodCode</TableHead>
-                    <TableHead>stockNo</TableHead>
-                    <TableHead>quantity</TableHead>
-                    <TableHead>date</TableHead>
+                    <TableHead>{t("lotNo")}</TableHead>
+                    <TableHead>{t("prodCode")}</TableHead>
+                    <TableHead>{t("stockNo")}</TableHead>
+                    <TableHead>{t("quantity")}</TableHead>
+                    <TableHead>{t("date")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import pool from "@/lib/db";
 
@@ -6,9 +7,9 @@ export async function getRecentStocked() {
     const client = await pool.connect();
     const result = await client.query(`
         SELECT p.lot_no, p.product_code, p.stock_no, p.description, t.quantity, t.created_at 
-        FROM transaction_history t 
-        JOIN parts p ON t.lot_no=p.lot_no 
-        WHERE status = 'stocked' 
+        FROM transaction_history t
+        JOIN parts p ON t.lot_no=p.lot_no
+        WHERE status = 'stocked'
         ORDER BY created_at DESC limit 10
     `);
     client.release();
