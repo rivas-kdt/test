@@ -16,12 +16,12 @@ import { Loader2, Lock, User } from "lucide-react";
 import { useState } from "react";
 import LocaleSwitcher from "@/components/localeSwitcher";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/features/auth/hooks/auth-context";
 
 const LoginMobile = () => {
-  const { login, error, loading } = useAuth();
+  const { login, loginError, loginLoading } = useAuth();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -64,7 +64,7 @@ const LoginMobile = () => {
           <form
             onSubmit={async (e) => {
               e.preventDefault();
-              await login({ username, password });
+              await login(username, password);
             }}
             className="space-y-4"
           >
@@ -98,16 +98,18 @@ const LoginMobile = () => {
                 />
               </div>
             </div>
-            {error && (
-              <p className="text-sm font-medium text-destructive">{error}</p>
+            {loginError && (
+              <p className="text-sm font-medium text-destructive">
+                {loginError}
+              </p>
             )}
             <Button
               type="submit"
               className="w-full bg-primary text-white"
               size="lg"
-              disabled={loading}
+              disabled={loginLoading}
             >
-              {loading ? (
+              {loginLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {t("loggingIn")}

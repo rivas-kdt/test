@@ -24,8 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useSession } from "@/features/auth/hooks/sessionProvider";
-// import { useAuth } from "@/features/auth/hooks/useAuth";
+import { ProtectedRoute } from "@/features/auth/components/protected-route";
+import { useAuth } from "@/features/auth/hooks/auth-context";
 import { useTransaction } from "@/features/dashboard/hooks/useDashboardHooks";
 import { useShip } from "@/features/dashboard/hooks/useShip";
 import { useStock } from "@/features/dashboard/hooks/useStock";
@@ -49,11 +49,11 @@ import {
   XAxis,
 } from "recharts";
 
-export default function Home() {
+function DashboardContent() {
   const t = useTranslations("DashboardPage");
-  const { user } = useSession();
+  const { session } = useAuth();
 
-  console.log(user);
+  console.log(session?.user);
 
   const {
     transactionLoading,
@@ -427,5 +427,13 @@ export default function Home() {
         </Card>
       </div>
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }

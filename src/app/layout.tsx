@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/lib/themeProvider";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { SessionProvider } from "@/features/auth/hooks/sessionProvider";
+import { AuthProvider } from "@/features/auth/hooks/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,12 +38,12 @@ export default async function RootLayout({
       >
         <ThemeProvider attribute="class">
           <NextIntlClientProvider>
-            <SessionProvider>
+            <AuthProvider>
               <div className=" h-20 w-full bg-amber-400 flex items-center justify-end p-4">
                 <ThemeToggle />
               </div>
               {children}
-            </SessionProvider>
+            </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

@@ -26,29 +26,24 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useShipHooks } from "@/features/ship/hooks/shipHooks";
-import { useShippingActions } from "@/features/ship/hooks/shippingActions";
+// import { useShippingActions } from "@/features/ship/hooks/shippingActions";
 import QrScanner from "@/components/qr-scanner";
 import toast from "react-hot-toast";
 import { useTheme } from "next-themes";
-import { useSession } from "@/features/auth/hooks/sessionProvider";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 
-interface WarehouseItem {
-  id: string;
-  product_code: string;
-  stock_no: string;
-  lot_no: string;
-  description: string;
-  quantity: number;
-  selected: boolean;
-  ship_quantity: number | string;
-}
+// interface WarehouseItem {
+//   id: string;
+//   product_code: string;
+//   stock_no: string;
+//   lot_no: string;
+//   description: string;
+//   quantity: number;
+//   selected: boolean;
+//   ship_quantity: number | string;
+// }
 
 export default function ShippedView() {
   const router = useRouter();
-  const { user } = useAuth();
-
-  console.log("Current user in ShippedView:", user);
 
   const [scanning, setScanning] = useState(false);
   const [highlightedItem, setHighlightedItem] = useState<string | null>(null);
@@ -56,8 +51,9 @@ export default function ShippedView() {
   const t = useTranslations("stock/ship");
   const { theme } = useTheme();
 
+  // If user is using desktop, redirect him to /dashboard
   useEffect(() => {
-    if (isMobile === undefined) return;
+    if (isMobile === undefined) return; // wait for detection
 
     if (!isMobile) {
       router.push("/dashboard");
@@ -66,9 +62,13 @@ export default function ShippedView() {
 
   const {
     loading,
+    fetchStockedParts,
     fetching,
     stockedParts,
     toggleItemSelection,
+    // toggleItemAdded,
+    // message,
+    // error,
     shipParts,
     handleScan,
     moveSelectedItems,
@@ -81,8 +81,19 @@ export default function ShippedView() {
     setHighlightedItem,
   });
 
-  console.log("fetching: ", fetching);
-  
+  useEffect(() => {
+    // const warehouseData = sessionStorage.getItem("selectedWarehouse");
+    // if (warehouseData) {
+    //   try {
+    //     const parsedWarehouse = JSON.parse(warehouseData);
+    //     setSelectedWarehouse(parsedWarehouse);
+    //   } catch (e) {
+    //     console.error("Error parsing warehouse data:", e);
+    //   }
+    // }
+    fetchStockedParts();
+  }, [fetchStockedParts, router]);
+
   return (
     <ScrollArea className="h-screen">
       <div className="flex flex-col w-screen p-4 pt-20  bg-linear-to-b from-primary/10 to-background">
@@ -133,7 +144,14 @@ export default function ShippedView() {
               </div>
             ) : (
               <div className="relative max-h-[500px] overflow-auto">
-                <Table className="w-full min-w-[800px]">
+                <Table
+                  className="w-full min-w-[800px]"
+                  // style={{
+                  //   maxHeight: "500px",
+                  //   overflowY: "auto", // force vertical scroll
+                  //   display: "block", // required so sticky works inside
+                  // }}
+                >
                   <TableHeader>
                     <TableRow>
                       <TableHead
@@ -261,7 +279,7 @@ export default function ShippedView() {
               <Table>
                 <TableHeader>
                   <TableRow className="whitespace-nowrap">
-                    {/* FIXME try na di mawala yung table head pag nag scroll down */}
+                    {/* //TODO try na di mawala yung table head pag nag scroll down */}
                     <TableHead
                       className="py-0"
                       style={{
@@ -269,7 +287,7 @@ export default function ShippedView() {
                           theme === "dark" ? "#131D34" : "#ffffff",
                       }}
                     >
-                      {t("th1")}
+                      {t("lotNo")}
                     </TableHead>
                     <TableHead
                       style={{
@@ -277,7 +295,7 @@ export default function ShippedView() {
                           theme === "dark" ? "#131D34" : "#ffffff",
                       }}
                     >
-                      {t("th2")}
+                      {t("prodNo")}
                     </TableHead>
                     <TableHead
                       style={{
@@ -285,7 +303,7 @@ export default function ShippedView() {
                           theme === "dark" ? "#131D34" : "#ffffff",
                       }}
                     >
-                      {t("th3")}
+                      {t("stockNo")}
                     </TableHead>
                     <TableHead
                       style={{
@@ -293,7 +311,7 @@ export default function ShippedView() {
                           theme === "dark" ? "#131D34" : "#ffffff",
                       }}
                     >
-                      {t("th4")}
+                      {t("desc")}
                     </TableHead>
                     <TableHead
                       style={{
@@ -301,7 +319,7 @@ export default function ShippedView() {
                           theme === "dark" ? "#131D34" : "#ffffff",
                       }}
                     >
-                      {t("stock")}
+                      {t("quantity")}
                     </TableHead>
                     <TableHead
                       style={{
@@ -312,7 +330,7 @@ export default function ShippedView() {
                       {t("th5")}
                     </TableHead>
                     <TableHead
-                      className="w-[80px]"
+                      className="w-20"
                       style={{
                         backgroundColor:
                           theme === "dark" ? "#131D34" : "#ffffff",
