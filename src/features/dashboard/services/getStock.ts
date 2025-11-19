@@ -1,4 +1,5 @@
-"use server"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use server";
 import pool from "@/lib/db";
 
 export async function getStock() {

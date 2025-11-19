@@ -12,14 +12,18 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/auth-context";
+// import { useSession } from "@/features/auth/hooks/sessionProvider";
+// import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Lock, Loader2, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const LoginDesktop = () => {
-  const { login, error, loading } = useAuth();
+  // const { login, error, loading } = useAuth();
+  // const { login, error, loading } = useSession();
+  const { login, loginError, loginLoading } = useAuth();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +33,7 @@ const LoginDesktop = () => {
   const t = useTranslations("LoginPage");
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-primary/10 to-background">
+    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-linear-to-b from-primary/10 to-background">
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-150 h-150 bg-primary/60 -z-10" />
       {/* <div className="absolute top-0 left-0 w-42 h-42 bg-primary/10 -z-10 rounded-br-[100%]" /> */}
@@ -71,7 +75,7 @@ const LoginDesktop = () => {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                await login({ username, password });
+                await login(username, password);
               }}
               className="space-y-6"
             >
@@ -107,15 +111,17 @@ const LoginDesktop = () => {
                   />
                 </div>
               </div>
-              {error && (
-                <p className="text-sm font-medium text-destructive">{error}</p>
+              {loginError && (
+                <p className="text-sm font-medium text-destructive">
+                  {loginError}
+                </p>
               )}
               <Button
                 type="submit"
                 className="w-full curosr-pointer text-white"
-                disabled={loading}
+                disabled={loginLoading}
               >
-                {loading ? (
+                {loginLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {t("loggingIn")}

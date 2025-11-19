@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import pool from "@/lib/db";
 import { encrypt } from "@/lib/jwt";
 import bcrypt from "bcryptjs";
 import { getTranslations } from "next-intl/server";
+import { User } from "../hooks/auth-context";
 
 export async function login(username: string, password: string) {
   const t = await getTranslations("loginFunction");
@@ -26,11 +28,15 @@ export async function login(username: string, password: string) {
       throw new Error(errorMessage);
     }
 
-    const user = {
+    const user: User = {
       userId: result.rows[0].uuid,
       email: result.rows[0].email,
       role: result.rows[0].role,
-      location: result.rows[0].location,
+      warehouse: {
+        id: result.rows[0].warehouse_id,
+        name: result.rows[0].warehouse,
+        location: result.rows[0].location,
+      },
       username: result.rows[0].username,
     };
     // const expires = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);

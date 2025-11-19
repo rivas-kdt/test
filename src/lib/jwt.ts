@@ -1,17 +1,13 @@
 "use server";
 
+import { User } from "@/features/auth/hooks/auth-context";
 import { SignJWT } from "jose";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtPayload {
   exp: number;
   iat: number;
-  user: {
-    userId: string;
-    email: string;
-    role: string;
-    username: string;
-  };
+  user: User;
 }
 
 const secretKey = process.env.JWT_SECRET_KEY;

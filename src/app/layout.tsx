@@ -6,7 +6,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { ThemeProvider } from "@/lib/themeProvider";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
-import { Toaster } from "react-hot-toast";
+import { SessionProvider } from "@/features/auth/hooks/sessionProvider";
+import { AuthProvider } from "@/features/auth/hooks/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,22 +29,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  
   const locale = await getLocale();
-  
+
   return (
-    <html lang="en" suppressHydrationWarning={true}>
+    <html lang={locale} suppressHydrationWarning={true}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute="class">
           <NextIntlClientProvider>
-            <div className=" h-20 w-full bg-amber-400 flex items-center justify-end p-4">
-              <ThemeToggle />
-            </div>
-            {children}
-            <Toaster position="top-center" />
+            <AuthProvider>
+              <div className=" h-20 w-full bg-amber-400 flex items-center justify-end p-4">
+                <ThemeToggle />
+              </div>
+              {children}
+            </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
