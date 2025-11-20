@@ -1,14 +1,22 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/useMobile";
-import LoginMobile from "./components/loginMobile";
-import LoginDesktop from "./components/loginDesktop";
+import LoginMobile from "../../../features/auth/components/loginMobile";
+import LoginDesktop from "../../../features/auth/components/loginDesktop";
+import { useAuth } from "@/features/auth/hooks/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(true);
+  const { session } = useAuth()
   const isMobile = useIsMobile();
 
+  const router = useRouter()
+
   useEffect(() => {
+    if (session != null) {
+      router.push('/')
+    }
     if (isMobile !== undefined) {
       setLoading(false);
     }

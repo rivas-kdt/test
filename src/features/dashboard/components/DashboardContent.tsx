@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Card,
   CardContent,
@@ -49,11 +48,8 @@ import {
   XAxis,
 } from "recharts";
 
-function DashboardContent() {
+const DashboardContent = () => {
   const t = useTranslations("DashboardPage");
-  const { session } = useAuth();
-
-  console.log(session?.user);
 
   const {
     transactionLoading,
@@ -97,8 +93,6 @@ function DashboardContent() {
       color: "hsl(var(--chart-2))",
     },
   } satisfies ChartConfig;
-
-  console.log(total);
 
   return (
     <main className="space-y-2 flex flex-col p-4">
@@ -427,13 +421,7 @@ function DashboardContent() {
         </Card>
       </div>
     </main>
-  );
+  )
 }
 
-export default function DashboardPage() {
-  return (
-    <ProtectedRoute>
-      <DashboardContent />
-    </ProtectedRoute>
-  );
-}
+export default DashboardContent
