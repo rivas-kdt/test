@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { getWarehouse } from "../services/getWarehouse";
 import { useAuth } from "@/features/auth/hooks/auth-context";

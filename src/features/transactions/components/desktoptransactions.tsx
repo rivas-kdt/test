@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 import { TransactionTable } from "./ui/transactionstab";
 import { Imagedialog } from "./ui/imgDialog";
+import { fetchParts } from "../services/getTransactions";
 
 export type Transaction = {
   lot_no: string;
@@ -24,17 +25,26 @@ const TransactionDesktop = () => {
   const [selectedImgUrl, setSelectedImgUrl] = useState<string>();
   const t = useTranslations("Table");
 
+  //TODO create useTransactionHooks to fetch data
+
   useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
     setLoading(true);
-    const fetchParts = async () => {
-      const response = await fetch("/api/v2/inventory/test");
-      const data2 = await response.json();
+    try {
+      const data2 = await fetchParts();
+      console.log("fetched data:", data2);
       setData(data2);
       setLoading(false);
-    };
-    fetchParts();
-  }, []);
-  console.log(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
+
+  console.log("data:", data);
   const InventoryColumns: ColumnDef<Transaction>[] = [
     {
       accessorKey: "lot_no",
