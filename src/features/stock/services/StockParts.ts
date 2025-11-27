@@ -1,4 +1,4 @@
-"use server";
+"use server"
 import pool from "@/lib/db";
 
 export async function stockParts(
@@ -8,76 +8,77 @@ export async function stockParts(
   description: any,
   quantity: any,
   warehouse_id: any
-  //   receipt_url: any
 ) {
-    console.log(lot_no)
+  const client = await pool.connect();
+
   try {
-    const client = await pool.connect();
     const partsResult = await client.query(
       `SELECT * FROM parts WHERE lot_no = $1`,
       [lot_no]
     );
 
-    if (!partsResult.rows) {
-      const insertNewPart = await client.query(
-        `INSERT INTO parts (lot_no, stock_no, product_code, description) VALUES ($1, $2, $3, $4) RETURNING *`,
+    const isNew = partsResult.rows.length === 0;
+
+    if (isNew) {
+      const newPart = await client.query(
+        `INSERT INTO parts (lot_no, stock_no, product_code, description)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
         [lot_no, stock_no, product_code, description]
       );
 
-      if (!insertNewPart.rows) {
-        throw new Error("Failed to insert new part");
-      }
-
-      const insertLocation = await client.query(
-        `INSERT INTO parts_location VALUES ($1, $2) RETURNING *`,
+      await client.query(
+        `INSERT INTO parts_location (lot_no, warehouse_id)
+         VALUES ($1, $2)`,
         [lot_no, warehouse_id]
       );
 
-      if (!insertLocation.rows) {
-        throw new Error("Failed to insert part location");
-      }
-
-      const insertInventory = await client.query(
-        `INSERT INTO inventory (lot_no, quantity) VALUES ($1, $2) RETURNING *`,
+      await client.query(
+        `INSERT INTO inventory (lot_no, quantity)
+         VALUES ($1, $2)`,
         [lot_no, quantity]
       );
 
-      if (!insertInventory.rows) {
-        throw new Error("Failed to insert inventory");
-      }
+      await client.query(
+        `INSERT INTO transaction_history (lot_no, status, quantity)
+         VALUES ($1, $2, $3)`,
+        [lot_no, "stocked", quantity]
+      );
 
-      return { message: "New part added and stocked." };
+      return { message: "New part added and stocked.", error: null };
     }
 
-    const checkInventory = await client.query(
-      `SELECT * FROM inventory WHERE lot_no = $1`,
+    const inventory = await client.query(
+      `SELECT quantity FROM inventory WHERE lot_no = $1`,
       [lot_no]
     );
 
-    if (checkInventory.rows.length > 0) {
+    if (inventory.rows.length > 0) {
       const newQty =
-        parseInt(checkInventory.rows[0].quantity) + parseInt(quantity);
-      const updateInventory = await client.query(
-        `UPDATE inventory SET quantity = $1 WHERE lot_no = $2 RETURNING *`,
+        Number(inventory.rows[0].quantity) + Number(quantity);
+
+      await client.query(
+        `UPDATE inventory SET quantity = $1 WHERE lot_no = $2`,
         [newQty, lot_no]
       );
-      if (!updateInventory.rows) {
-        throw new Error("Failed to update inventory");
-      }
+    } else {
+      await client.query(
+        `INSERT INTO inventory (lot_no, quantity)
+        VALUES ($1, $2)`,
+        [lot_no, quantity]
+      );
     }
 
-    const insertTransaction = await client.query(
-      `INSERT INTO transaction_history (lot_no, status, quantity) VALUES ($1, $2, $3) RETURNING *`,
+    await client.query(
+      `INSERT INTO transaction_history (lot_no, status, quantity)
+       VALUES ($1, $2, $3)`,
       [lot_no, "stocked", quantity]
     );
 
-    if (!insertTransaction.rows) {
-      throw new Error("Failed to insert transaction history");
-    }
-
+    return { message: "Part stocked successfully.", error: null };
+  } catch (err: any) {
+    return { message: null, error: err.message };
+  } finally {
     client.release();
-    return { message: "Part stocked successfully." };
-  } catch (error) {
-    throw new Error("Database error: " + (error as Error).message);
   }
 }

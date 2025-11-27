@@ -75,7 +75,7 @@ export function InventoryTable<TData, TValue>({
 
   const uniqueLocations = React.useMemo(() => {
     const locations = new Set<string>();
-    warehouse?.forEach((item) => {
+    warehouse?.forEach((item : any) => {
       if (item.warehouse) {
         locations.add(item.warehouse);
       }

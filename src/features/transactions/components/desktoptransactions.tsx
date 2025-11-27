@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 import { TransactionTable } from "./ui/transactionstab";
 import { Imagedialog } from "./ui/imgDialog";
-import { fetchParts } from "../services/getTransactions";
+import { fetchParts, getTransactions } from "../services/getTransactions";
 
 export type Transaction = {
   lot_no: string;
@@ -34,9 +34,10 @@ const TransactionDesktop = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data2 = await fetchParts();
-      console.log("fetched data:", data2);
-      setData(data2);
+      // const data2 = await fetchParts();
+      const data3 = await getTransactions();
+      console.log("fetched data:", data3);
+      setData(data3);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);

@@ -128,7 +128,7 @@ const LandingContent = () => {
                     className="py-8 flex items-center justify-center gap-2 rounded-xl shadow-md bg-primary w-full"
                     onClick={() => {
                         setLoading(true);
-                        router.push("/test/stock");
+                        router.push("/stock");
                     }}
                     disabled={loading}
                 >

@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ThemeProvider } from "@/lib/themeProvider";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
-import { SessionProvider } from "@/features/auth/hooks/sessionProvider";
 import { AuthProvider } from "@/features/auth/hooks/auth-context";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +42,7 @@ export default async function RootLayout({
                 <ThemeToggle />
               </div>
               {children}
+              <Toaster />
             </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
