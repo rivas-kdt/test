@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { supabase } from "@/lib/supabaseClient";
 import { stockParts } from "../services/StockParts";
+import { v4 as uuidv4 } from "uuid";
 
 export function useStockActions() {
   const [scannedItems, setScannedItems] = useState<any[]>([]);
@@ -51,9 +53,7 @@ export function useStockActions() {
     const q = parseInt(newQ);
 
     setScannedItems((prev) =>
-      prev.map((i) =>
-        i.id === id ? { ...i, quantity: isNaN(q) ? 0 : q } : i
-      )
+      prev.map((i) => (i.id === id ? { ...i, quantity: isNaN(q) ? 0 : q } : i))
     );
   };
 
@@ -101,11 +101,51 @@ export function useStockActions() {
 
     try {
       const warehouseId = sessionStorage.getItem("selectedWarehouseId");
+
       if (!warehouseId) {
         console.log("Warehouse ID not found in sessionStorage");
         toast.error("Warehouse not selected");
         return;
       }
+
+      // const firstLotNo = scannedItems[0]?.lotNo ?? "unknown-lot";
+      // const sanitizedLotNo = firstLotNo.replace(/[^a-zA-Z0-9_-]/g, ""); // clean filename
+
+      // const today = new Date();
+      // const yyyy = today.getFullYear();
+      // const mm = String(today.getMonth() + 1).padStart(2, "0");
+      // const dd = String(today.getDate()).padStart(2, "0");
+      // const formattedDate = `${yyyy}${mm}${dd}`;
+
+      const fileExtension = receiptFile.name.split(".").pop(); // get original extension
+      //
+      const id = uuidv4();
+      const fileName = `${id}.${fileExtension}`;
+
+      // const fileName = `${sanitizedLotNo}-${formattedDate}.${fileExtension}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("xmon-storage")
+        .upload(`receipts/${fileName}`, receiptFile);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        toast.error("Failed to upload receipt.");
+        setLoading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("xmon-storage")
+        .getPublicUrl(`receipts/${fileName}`);
+
+      if (!urlData?.publicUrl) {
+        toast.error("Failed to get receipt URL.");
+        setLoading(false);
+        return;
+      }
+
+      const receiptUrl = urlData.publicUrl;
+      setReceipt(receiptUrl);
 
       for (const item of scannedItems) {
         const res = await stockParts(
@@ -114,7 +154,8 @@ export function useStockActions() {
           item.productCode,
           item.description,
           item.quantity,
-          warehouseId
+          warehouseId,
+          receiptUrl
         );
         console.log("StockParts response:", res);
         if (res.error) {

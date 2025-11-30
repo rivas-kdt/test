@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { AuthProvider } from "@/features/auth/hooks/auth-context";
 import { Toaster } from "react-hot-toast";
+import Header from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,9 +39,10 @@ export default async function RootLayout({
         <ThemeProvider attribute="class">
           <NextIntlClientProvider>
             <AuthProvider>
-              <div className=" h-20 w-full bg-amber-400 flex items-center justify-end p-4">
+              {/* <div className=" h-20 w-full bg-amber-400 flex items-center justify-end p-4">
                 <ThemeToggle />
-              </div>
+              </div> */}
+              <Header />
               {children}
               <Toaster />
             </AuthProvider>

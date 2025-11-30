@@ -1,15 +1,22 @@
 "use client";
 
-import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 export default function Loader() {
-  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen bg-background" />
+    );
+  }
 
   return (
     <div
-      className={`flex items-center justify-center w-full h-screen bg-background transition-colors duration-300 ${
-        theme === "dark" ? "bg-[#0f1729]" : "bg-[#f8fafc]"
-      }`}
+      className={`flex items-center justify-center w-full h-screen transition-colors duration-300 bg-background`}
     >
       <div className="loader">
         {[...Array(8)].map((_, i) => (

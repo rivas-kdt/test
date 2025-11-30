@@ -23,11 +23,12 @@ export async function getTransactions() {
     //     transaction_image(imgUrl)
     //   `)
     //   .order("created_at", { ascending: false })
-    const query = `SELECT th.lot_no, th.quantity, th.status, th.created_at as date, p.description, p.stock_no, w.warehouse
-    FROM transaction_history th 
-    JOIN parts p ON th.lot_no = p.lot_no 
-    JOIN parts_location pl ON p.lot_no = pl.lot_no 
-    JOIN warehouse w ON pl.warehouse_id = w.id 
+    const query = `SELECT th.lot_no, th.quantity, th.status, th.created_at as date, p.description, p.stock_no, w.warehouse, ti."imgUrl"
+    FROM transaction_history th
+    JOIN parts p ON th.lot_no = p.lot_no
+    JOIN parts_location pl ON p.lot_no = pl.lot_no
+    JOIN warehouse w ON pl.warehouse_id = w.id
+    LEFT JOIN transaction_image ti ON th.id = ti.id
     ORDER BY th.created_at DESC`;
     const result = await client.query(query);
     return result.rows;

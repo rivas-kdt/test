@@ -16,7 +16,7 @@ export async function getMonthlyTransaction() {
                  status,
                  SUM(quantity) AS total_quantity
           FROM transaction_history
-          WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months'
+          WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '12 months'
           GROUP BY DATE_TRUNC('month', created_at), status
         )
       SELECT

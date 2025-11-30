@@ -45,8 +45,8 @@ export default function StockView() {
   } = useStockActions();
 
   // For manual QR simulation
-//   const [simulateDialog, setSimulateDialog] = useState(false);
-//   const [simulatedQR, setSimulatedQR] = useState("");
+  const [simulateDialog, setSimulateDialog] = useState(false);
+  const [simulatedQR, setSimulatedQR] = useState("");
 
   return (
     <div className="flex flex-col w-screen p-4 pt-20 bg-gradient-to-b from-primary/10 to-background">
@@ -63,35 +63,32 @@ export default function StockView() {
       {scanning ? (
         <Card className="mb-4">
           <CardContent className="p-.5">
-            <QrScanner
-              onScan={handleScan}
-              onClose={() => setScanning(false)}
-            />
+            <QrScanner onScan={handleScan} onClose={() => setScanning(false)} />
           </CardContent>
         </Card>
       ) : (
         <div className="flex gap-2 w-full mb-4">
-          <Button
+          {/* <Button
             onClick={() => setScanning(true)}
             className="bg-primary text-md w-full h-[50px]"
           >
             <Camera className="mr-2" />
             {t("scanqr")}
-          </Button>
+          </Button> */}
 
           {/* Manual simulation button */}
-          {/* <Button
+          <Button
             variant="outline"
             className="h-[50px] w-full"
             onClick={() => setSimulateDialog(true)}
           >
             Simulate QR
-          </Button> */}
+          </Button>
         </div>
       )}
 
       {/* Simulate QR Dialog */}
-      {/* <Dialog open={simulateDialog} onOpenChange={setSimulateDialog}>
+      <Dialog open={simulateDialog} onOpenChange={setSimulateDialog}>
         <DialogContent className="max-w-md">
           <DialogTitle>Simulate QR Scan</DialogTitle>
           <p className="text-sm text-muted-foreground mb-2">
@@ -120,7 +117,7 @@ export default function StockView() {
             Apply
           </Button>
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
 
       {/* Scanned Items Table */}
       <div className="relative max-h-[500px] overflow-auto">

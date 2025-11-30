@@ -43,10 +43,19 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Line,
   LineChart,
+  ResponsiveContainer,
   XAxis,
+  YAxis,
 } from "recharts";
+
+interface MonthlyData {
+  month_name: string;
+  stocked: number;
+  shipped: number;
+}
 
 const DashboardContent = () => {
   const t = useTranslations("DashboardPage");
@@ -93,6 +102,14 @@ const DashboardContent = () => {
       color: "hsl(var(--chart-2))",
     },
   } satisfies ChartConfig;
+
+  const maxStocked = Math.max(
+    ...(monthly?.map((d: MonthlyData) => d.stocked) ?? [0])
+  );
+  const maxShipped = Math.max(
+    ...(monthly?.map((d: MonthlyData) => d.shipped) ?? [0])
+  );
+  const maxY = Math.max(maxStocked, maxShipped) * 1.05;
 
   return (
     <main className="space-y-2 flex flex-col p-4">
@@ -234,7 +251,7 @@ const DashboardContent = () => {
         <Card className="col-span-3 flex flex-col">
           <CardHeader>
             <CardTitle className="text-primary">
-              Warehouse Transaction
+              {t("warehouseTransaction")}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1">
@@ -249,20 +266,74 @@ const DashboardContent = () => {
                 config={chartConfig}
                 className="h-[calc(40vh-80px)] w-full"
               >
-                <BarChart data={warehouseInventory}>
+                <BarChart accessibilityLayer data={warehouseInventory}>
                   <CartesianGrid vertical={false} />
                   <XAxis
                     dataKey="warehouse"
                     tickLine={false}
                     tickMargin={10}
                     axisLine={false}
+                    hide
                   />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value, props) => {
+                          console.log(props);
+                          return (
+                            <div className=" flex items-center gap-2">
+                              <div className={` h-2 w-2`}></div>
+                              {`${t("stocked")}: ${value}`}
+                            </div>
+                          );
+                        }}
+                      />
+                    }
+                  />
                   <ChartLegend content={<ChartLegendContent />} />
                   <Bar dataKey="stocked" radius={[0, 0, 4, 4]}>
                     {warehouseInventory.map((_, i) => (
                       <Cell key={i} fill={`var(--chart-${(i % 5) + 1})`} />
                     ))}
+                    <LabelList
+                      dataKey="stocked"
+                      position="insideTop"
+                      fontSize={12}
+                      content={(props) => {
+                        const { x, y, width, height, value } = props;
+
+                        const barHeight = Number(height); // ensure it's a number
+                        const barWidth = Number(width);
+                        const posX = Number(x) + barWidth / 2;
+                        // Determine Y position
+                        // If bar is too short, render above; else inside
+                        const isAbove = barHeight < 20;
+                        const posY = isAbove ? Number(y) - 4 : Number(y) + 12;
+
+                        // if (
+                        //   !x ||
+                        //   !y ||
+                        //   !width ||
+                        //   isNaN(barHeight) ||
+                        //   barHeight < 20
+                        // )
+                        //   return null;
+
+                        return (
+                          <text
+                            x={posX}
+                            y={posY}
+                            //  fill="background"
+                            fill={isAbove ? "var(--foreground)" : "background"}
+                            textAnchor="middle"
+                            fontSize={12}
+                            fontWeight="bold"
+                          >
+                            {value}
+                          </text>
+                        );
+                      }}
+                    />
                   </Bar>
                 </BarChart>
               </ChartContainer>
@@ -273,7 +344,9 @@ const DashboardContent = () => {
         {/* Monthly Overview */}
         <Card className="col-span-3 flex flex-col">
           <CardHeader>
-            <CardTitle className="text-primary">Monthly Overview</CardTitle>
+            <CardTitle className="text-primary">
+              {t("monthlyOverview")}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex-1">
             {transactionLoading ? (
@@ -283,34 +356,53 @@ const DashboardContent = () => {
                 config={chartConfig}
                 className="h-[calc(40vh-80px)] w-full"
               >
-                <LineChart data={monthly} margin={{ left: 12, right: 12 }}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month_name"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent />}
-                  />
-                  <Line
-                    dataKey="stocked"
-                    type="monotone"
-                    stroke="var(--color-chart-1)"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                  <Line
-                    dataKey="shipped"
-                    type="monotone"
-                    stroke="var(--color-chart-2)"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    accessibilityLayer
+                    data={monthly ?? []}
+                    margin={{ right: 12, left: 14, bottom: 20 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="month_name"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      tickFormatter={(value) => {
+                        const translated = t(`months.${value}`, {
+                          fallback: value,
+                        });
+                        return translated.slice(0, 3);
+                      }}
+                      domain={[0, maxY]}
+                    />
+                    <YAxis
+                      type="number"
+                      tickLine={false}
+                      axisLine={false}
+                      domain={[0, maxY]}
+                      hide
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent />}
+                    />
+                    <Line
+                      dataKey="stocked"
+                      type="monotone"
+                      stroke="var(--color-chart-1)"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line
+                      dataKey="shipped"
+                      type="monotone"
+                      stroke="var(--color-chart-2)"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </ChartContainer>
             )}
           </CardContent>
@@ -421,7 +513,7 @@ const DashboardContent = () => {
         </Card>
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default DashboardContent
+export default DashboardContent;

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { TransactionTable } from "./ui/transactionstab";
 import { Imagedialog } from "./ui/imgDialog";
 import { fetchParts, getTransactions } from "../services/getTransactions";
+import { useTransactionHooks } from "../hooks/useTransactions";
 
 export type Transaction = {
   lot_no: string;
@@ -19,33 +20,34 @@ export type Transaction = {
 } | null;
 
 const TransactionDesktop = () => {
-  const [data, setData] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  // const [data, setData] = useState<Transaction[]>([]);
+  // const [loading, setLoading] = useState<boolean>(false);
   const [imgOpen, setImgOpen] = useState(false);
   const [selectedImgUrl, setSelectedImgUrl] = useState<string>();
+  const { transactions, loading, error } = useTransactionHooks();
   const t = useTranslations("Table");
 
   //TODO create useTransactionHooks to fetch data
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // const data2 = await fetchParts();
-      const data3 = await getTransactions();
-      console.log("fetched data:", data3);
-      setData(data3);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
-  };
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     // const data2 = await fetchParts();
+  //     const data3 = await getTransactions();
+  //     console.log("fetched data:", data3);
+  //     setData(data3);
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //     setLoading(false);
+  //   }
+  // };
 
-  console.log("data:", data);
+  console.log("data:", transactions);
   const InventoryColumns: ColumnDef<Transaction>[] = [
     {
       accessorKey: "lot_no",
@@ -130,11 +132,11 @@ const TransactionDesktop = () => {
   ];
 
   return (
-    <main className="p-4 flex flex-col bg-gradient-to-b from-primary/10 to-background">
+    <main className="p-4 flex flex-col bg-linear-to-b from-primary/10 to-background">
       <div className="  h-full w-full flex items-center">
         <TransactionTable
           columns={InventoryColumns}
-          data={data}
+          data={transactions}
           loading={loading}
         />
       </div>

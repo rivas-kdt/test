@@ -10,7 +10,6 @@ import {
 } from "./ui/dropdown-menu";
 import { ThemeToggle } from "./theme-toggle";
 import { useTheme } from "next-themes";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useIsMobile } from "../hooks/useMobile";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,11 +24,13 @@ import { LanguageIcon } from "@heroicons/react/24/solid";
 import { Switch } from "./ui/switch";
 import LocaleSwitcherSelect from "./localeSwitcherSelector";
 import LocaleSwitcherDropdown from "./localeSwitcherDropdown";
+import { deleteSession } from "@/lib/cookieHandler";
+import { useAuth } from "@/features/auth/hooks/auth-context";
 
 export default function Header() {
   const router = useRouter();
+  const { logout } = useAuth();
   const pathname = usePathname();
-  const { user, loading } = useAuth(false);
   const { resolvedTheme, setTheme } = useTheme();
   const isMobile = useIsMobile();
   const t = useTranslations("Header");
@@ -56,19 +57,13 @@ export default function Header() {
     return null;
   }
 
-  //   const handleLogout = async () => {
-  //     if (window.confirm("Are you sure you want to log out?")) {
-  //       await deleteSession();
-  //       localStorage.removeItem("token");
-  //       sessionStorage.removeItem("selectedWarehouseId");
-  //       sessionStorage.removeItem("selectedWarehouse");
-  //       router.push("/login");
-  //     }
-  //   };
+  const handleLogout = async () => {
+    logout();
+  };
 
   if (loading2) {
     return (
-      <div className="w-screen h-[80px] flex items-center justify-between p-4">
+      <div className="w-screen h-20 flex items-center justify-between p-4">
         <Skeleton className=" h-full w-[200px]" />
         <Skeleton className=" h-full w-[600px]" />
         <Skeleton className=" h-full w-[300px]" />
@@ -116,9 +111,9 @@ export default function Header() {
                   <div className="p-4">
                     <div className="flex flex-col gap-4 pb-4">
                       <button
-                        onClick={() => router.push("/test")}
+                        onClick={() => router.push("/")}
                         className={`flex items-center gap-2 ${
-                          pathname === "/test"
+                          pathname === "/"
                             ? "underline decoration-2 underline-offset-4 font-medium"
                             : ""
                         }`}
@@ -170,7 +165,7 @@ export default function Header() {
                   <div className="absolute bottom-0 w-full ">
                     <div className="border-t border-gray-300 px-4 py-4">
                       <button
-                        // onClick={handleLogout}
+                        onClick={logout}
                         className="flex items-center gap-2 p-2"
                       >
                         <LogOut className="h-[1.2rem] w-[1.2rem]" />
@@ -196,7 +191,7 @@ export default function Header() {
 
   // Desktop Header
   return (
-    <div className="h-[80px] w-full flex justify-between items-center p-4">
+    <div className="h-20 w-full flex justify-between items-center p-4">
       <div className="flex w-full gap-16">
         <div className="flex items-center">
           <div
@@ -225,9 +220,9 @@ export default function Header() {
             {t("admin")}
           </Link>
           <Link
-            href="/dashboard"
+            href="/"
             className={`${
-              pathname === "/dashboard" ? "" : "text-muted-foreground"
+              pathname === "/" ? "" : "text-muted-foreground"
             } font-medium transition-colors hover:text-primary`}
           >
             {t("dashboard")}
@@ -262,7 +257,7 @@ export default function Header() {
           <ThemeToggle />
           <Button
             size={"default"}
-            // onClick={handleLogout}
+            onClick={logout}
             className=" bg-destructive hover:bg-destructive/80"
           >
             <LogOut className="h-[1.2rem] w-[1.2rem] p-.5" />

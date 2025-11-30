@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import pool from "@/lib/db";
 
 export async function stockParts(
@@ -7,7 +7,8 @@ export async function stockParts(
   product_code: any,
   description: any,
   quantity: any,
-  warehouse_id: any
+  warehouse_id: any,
+  receipt_url: any
 ) {
   const client = await pool.connect();
 
@@ -20,7 +21,7 @@ export async function stockParts(
     const isNew = partsResult.rows.length === 0;
 
     if (isNew) {
-      const newPart = await client.query(
+      await client.query(
         `INSERT INTO parts (lot_no, stock_no, product_code, description)
          VALUES ($1, $2, $3, $4)
          RETURNING *`,
@@ -39,12 +40,16 @@ export async function stockParts(
         [lot_no, quantity]
       );
 
-      await client.query(
+      const res = await client.query(
         `INSERT INTO transaction_history (lot_no, status, quantity)
-         VALUES ($1, $2, $3)`,
+   VALUES ($1, $2, $3) RETURNING id`,
         [lot_no, "stocked", quantity]
       );
 
+      await client.query(
+        `INSERT INTO transaction_image (id, "imgUrl") VALUES ($1, $2)`,
+        [res.rows[0].id, receipt_url]
+      );
       return { message: "New part added and stocked.", error: null };
     }
 
@@ -54,8 +59,7 @@ export async function stockParts(
     );
 
     if (inventory.rows.length > 0) {
-      const newQty =
-        Number(inventory.rows[0].quantity) + Number(quantity);
+      const newQty = Number(inventory.rows[0].quantity) + Number(quantity);
 
       await client.query(
         `UPDATE inventory SET quantity = $1 WHERE lot_no = $2`,
@@ -69,10 +73,15 @@ export async function stockParts(
       );
     }
 
-    await client.query(
+    const res = await client.query(
       `INSERT INTO transaction_history (lot_no, status, quantity)
-       VALUES ($1, $2, $3)`,
+   VALUES ($1, $2, $3) RETURNING id`,
       [lot_no, "stocked", quantity]
+    );
+
+    await client.query(
+      `INSERT INTO transaction_image (id, "imgUrl") VALUES ($1, $2)`,
+      [res.rows[0].id, receipt_url]
     );
 
     return { message: "Part stocked successfully.", error: null };
