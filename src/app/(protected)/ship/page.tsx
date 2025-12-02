@@ -62,7 +62,7 @@ export default function ShippedView() {
 
   const {
     loading,
-    fetchStockedParts,
+    // fetchStockedParts,
     fetching,
     stockedParts,
     toggleItemSelection,
@@ -81,18 +81,18 @@ export default function ShippedView() {
     setHighlightedItem,
   });
 
-  useEffect(() => {
-    // const warehouseData = sessionStorage.getItem("selectedWarehouse");
-    // if (warehouseData) {
-    //   try {
-    //     const parsedWarehouse = JSON.parse(warehouseData);
-    //     setSelectedWarehouse(parsedWarehouse);
-    //   } catch (e) {
-    //     console.error("Error parsing warehouse data:", e);
-    //   }
-    // }
-    fetchStockedParts();
-  }, [fetchStockedParts, router]);
+  // useEffect(() => {
+  // const warehouseData = sessionStorage.getItem("selectedWarehouse");
+  // if (warehouseData) {
+  //   try {
+  //     const parsedWarehouse = JSON.parse(warehouseData);
+  //     setSelectedWarehouse(parsedWarehouse);
+  //   } catch (e) {
+  //     console.error("Error parsing warehouse data:", e);
+  //   }
+  // }
+  //   fetchStockedParts();
+  // }, [fetchStockedParts, router]);
 
   return (
     <ScrollArea className="h-screen">
@@ -124,7 +124,7 @@ export default function ShippedView() {
             onClick={() => setScanning(true)}
           >
             <Camera style={{ width: "20px", height: "20px" }} />
-            {t("b1")}
+            {t("scanqr")}
           </Button>
         )}
         {/* Table 1: Stocked Items */}
@@ -169,7 +169,7 @@ export default function ShippedView() {
                             theme === "dark" ? "#131D34" : "#ffffff",
                         }}
                       >
-                        {t("th1")}
+                        {t("lotNo")}
                       </TableHead>
                       <TableHead
                         style={{
@@ -177,7 +177,7 @@ export default function ShippedView() {
                             theme === "dark" ? "#131D34" : "#ffffff",
                         }}
                       >
-                        {t("th2")}
+                        {t("prodNo")}
                       </TableHead>
                       <TableHead
                         style={{
@@ -185,7 +185,7 @@ export default function ShippedView() {
                             theme === "dark" ? "#131D34" : "#ffffff",
                         }}
                       >
-                        {t("th3")}
+                        {t("stockNo")}
                       </TableHead>
                       <TableHead
                         style={{
@@ -193,7 +193,7 @@ export default function ShippedView() {
                             theme === "dark" ? "#131D34" : "#ffffff",
                         }}
                       >
-                        {t("th4")}
+                        {t("desc")}
                       </TableHead>
                       <TableHead
                         style={{
@@ -201,7 +201,7 @@ export default function ShippedView() {
                             theme === "dark" ? "#131D34" : "#ffffff",
                         }}
                       >
-                        {t("th5")}
+                        {t("quantity")}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -261,7 +261,7 @@ export default function ShippedView() {
               className="w-full bg-primary text-md h-[50px]"
             >
               <ArrowDownToLine style={{ width: "20px", height: "20px" }} />
-              {t("b3")}
+              {t("addToShip")}
             </Button>
           </div>
         </Card>
@@ -330,7 +330,7 @@ export default function ShippedView() {
                       {t("th5")}
                     </TableHead>
                     <TableHead
-                      className="w-20"
+                      className="w-[80px]"
                       style={{
                         backgroundColor:
                           theme === "dark" ? "#131D34" : "#ffffff",

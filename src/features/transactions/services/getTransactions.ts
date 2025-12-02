@@ -13,16 +13,6 @@ export const fetchParts = async () => {
 export async function getTransactions() {
   const client = await pool.connect();
   try {
-    //  .from("transaction_history")
-    //   .select(`
-    //     lot_no,
-    //     quantity,
-    //     status,
-    //     created_at,
-    //     parts(parts_location(warehouse(warehouse)), description, stock_no),
-    //     transaction_image(imgUrl)
-    //   `)
-    //   .order("created_at", { ascending: false })
     const query = `SELECT th.lot_no, th.quantity, th.status, th.created_at as date, p.description, p.stock_no, w.warehouse, ti."imgUrl"
     FROM transaction_history th
     JOIN parts p ON th.lot_no = p.lot_no

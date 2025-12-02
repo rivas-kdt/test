@@ -22,22 +22,21 @@ import { useRouter } from "next/navigation";
 import Loader from "@/components/ui/loader";
 import { useLanding } from "@/features/landing/hooks/useLanding";
 import { useAuth } from "@/features/auth/hooks/auth-context";
+import { useWarehouse } from "@/context/warehouseContext";
 
 const LandingContent = () => {
   const t = useTranslations("landing-page");
+  const {
+    warehouses,
+    selectedWarehouse,
+    loading,
+    location,
+    warehouseId,
+    handleWarehouseChange,
+  } = useWarehouse();
   const router = useRouter();
   const { session } = useAuth();
   const isAdmin = session?.user?.role === "admin";
-
-  const {
-    warehouse,
-    warehouseLoading,
-    selectedWarehouse,
-    handleWarehouseChange,
-    selectedLocation,
-  } = useLanding();
-
-  const [loading, setLoading] = useState(false);
 
   return (
     <main className="flex flex-col w-screen min-h-screen p-4 pt-24 bg-linear-to-b from-primary/10 to-background">
@@ -58,21 +57,25 @@ const LandingContent = () => {
                   {t("selectWarehouse")}
                 </label>
                 <Select
-                  value={selectedWarehouse?.id}
-                  onValueChange={handleWarehouseChange}
-                  disabled={warehouseLoading}
+                  value={warehouseId || ""}
+                  defaultValue="Select Warehouse"
+                  onValueChange={(value) => {
+                    // setWarehouseId(value);
+                    handleWarehouseChange(value);
+                  }}
+                  disabled={loading}
                 >
                   <SelectTrigger className="flex w-full h-[50px]">
                     <SelectValue placeholder={t("selectWarehouse")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {warehouseLoading ? (
+                    {loading ? (
                       <div className="flex items-center justify-center py-2 h-[50px] text-md">
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         <span>{t("loading")}</span>
                       </div>
                     ) : (
-                      warehouse.map((warehouse: any) => (
+                      warehouses.map((warehouse: any) => (
                         <SelectItem
                           key={warehouse.id}
                           value={warehouse.id}
@@ -115,7 +118,7 @@ const LandingContent = () => {
                     <div className="flex items-center p-2 border rounded-md bg-muted/30">
                       <MapPin className="h-4 w-4 mr-2" />
                       <span className="text-sm">
-                        {selectedLocation || t("errorLocX")}
+                        {selectedWarehouse?.location || t("errorLocX")}
                       </span>
                     </div>
                   </div>
@@ -127,7 +130,6 @@ const LandingContent = () => {
         <Button
           className="py-8 flex items-center justify-center gap-2 rounded-xl shadow-md bg-primary w-full"
           onClick={() => {
-            setLoading(true);
             router.push("/stock");
           }}
           disabled={loading}
@@ -145,7 +147,6 @@ const LandingContent = () => {
         <Button
           className="py-8 flex items-center justify-center gap-2 rounded-xl shadow-md bg-primary w-full"
           onClick={() => {
-            setLoading(true);
             router.push("/ship");
           }}
           disabled={loading}

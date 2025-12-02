@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Users } from "@/app/admin/page";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Users } from "@/app/(protected)/admin/page";
 
 interface EditUserDialogProps {
   user: Users;
@@ -46,7 +46,7 @@ export function EditUserDialog({
   });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const t = useTranslations("editUser")
+  const t = useTranslations("editUser");
 
   useEffect(() => {
     if (user) {
@@ -107,15 +107,13 @@ export function EditUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{t('header')}</DialogTitle>
-          <DialogDescription>
-            {t('description')}
-          </DialogDescription>
+          <DialogTitle>{t("header")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="username" className="text-right">
-              {t('username')}
+              {t("username")}
             </Label>
             <Input
               id="username"
@@ -126,7 +124,7 @@ export function EditUserDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="email" className="text-right">
-              {t('email')}
+              {t("email")}
             </Label>
             <Input
               id="email"
@@ -138,7 +136,7 @@ export function EditUserDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="role" className="text-right">
-              {t('role')}
+              {t("role")}
             </Label>
             <Select
               value={formData.role}
@@ -148,8 +146,8 @@ export function EditUserDialog({
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">{t('admin')}</SelectItem>
-                <SelectItem value="worker">{t('worker')}</SelectItem>
+                <SelectItem value="admin">{t("admin")}</SelectItem>
+                <SelectItem value="worker">{t("worker")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -161,7 +159,7 @@ export function EditUserDialog({
             disabled={isLoading}
             className="bg-amber-400 hover:bg-amber-400/75 text-black"
           >
-            {isLoading ? t("addingState") : t('button')}
+            {isLoading ? t("addingState") : t("button")}
           </Button>
         </DialogFooter>
       </DialogContent>

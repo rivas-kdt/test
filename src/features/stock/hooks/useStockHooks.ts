@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { stockParts } from "../services/StockParts";
 import { v4 as uuidv4 } from "uuid";
+import { useWarehouse } from "@/context/warehouseContext";
 
 export function useStockActions() {
   const [scannedItems, setScannedItems] = useState<any[]>([]);
@@ -10,6 +11,7 @@ export function useStockActions() {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { warehouseId } = useWarehouse();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -100,10 +102,10 @@ export function useStockActions() {
     setLoading(true);
 
     try {
-      const warehouseId = sessionStorage.getItem("selectedWarehouseId");
+      // const warehouseId = sessionStorage.getItem("selectedWarehouseId");
 
       if (!warehouseId) {
-        console.log("Warehouse ID not found in sessionStorage");
+        console.log("Warehouse ID not found");
         toast.error("Warehouse not selected");
         return;
       }

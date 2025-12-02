@@ -20,24 +20,22 @@ export type Inventory = {
 } | null;
 
 const InventoryPage = () => {
-  const [data, setData] = useState<Inventory[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const t = useTranslations("Table");
 
-  const { inventory, inventoryLoading, warehouse } = useInventory()
-  console.log(inventory)
+  const { inventory, inventoryLoading, warehouse } = useInventory();
+  console.log(inventory);
 
-  useEffect(() => {
-    setLoading(true);
-    const fetchParts = async () => {
-      const response = await fetch("/api/inventory");
-      const data2 = await response.json();
-      console.log(data2);
-      setData(data2);
-      setLoading(false);
-    };
-    fetchParts();
-  }, []);
+  // useEffect(() => {
+  //   setLoading(true);
+  //   const fetchParts = async () => {
+  //     const response = await fetch("/api/inventory");
+  //     const data2 = await response.json();
+  //     console.log(data2);
+  //     setData(data2);
+  //     setLoading(false);
+  //   };
+  //   fetchParts();
+  // }, []);
 
   const InventoryColumns: ColumnDef<Inventory>[] = [
     {
@@ -89,7 +87,7 @@ const InventoryPage = () => {
   ];
 
   return (
-    <main className="  p-4 gap-2 bg-gradient-to-b from-primary/10 to-background">
+    <main className="  p-4 gap-2 bg-linear-to-b from-primary/10 to-background">
       <div className="  h-full w-full flex items-center">
         <InventoryTable
           columns={InventoryColumns}

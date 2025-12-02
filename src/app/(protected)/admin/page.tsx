@@ -19,7 +19,7 @@ import { WarehouseTab } from "@/features/admin/components/warehouseTab";
 import { EditUserDialog } from "@/features/admin/components/editUserDialog";
 import { EditWarehouseDialog } from "@/features/admin/components/editWarehouseDialog";
 
-type Users = {
+export type Users = {
   id: string;
   username: string;
   email: string;
@@ -29,14 +29,14 @@ type Users = {
   createdAt: string;
 } | null;
 
-type Recipients = {
+export type Recipients = {
   id: string;
   email: string;
   isactive: boolean;
   created_at: string;
 };
 
-type Warehouse = {
+export type Warehouse = {
   id: string;
   warehouse: string;
   location: string;

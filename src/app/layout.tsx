@@ -8,6 +8,7 @@ import { getLocale } from "next-intl/server";
 import { AuthProvider } from "@/features/auth/hooks/auth-context";
 import { Toaster } from "react-hot-toast";
 import Header from "@/components/header";
+import WarehouseProvider from "@/context/warehouseContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,11 +40,13 @@ export default async function RootLayout({
         <ThemeProvider attribute="class">
           <NextIntlClientProvider>
             <AuthProvider>
-              {/* <div className=" h-20 w-full bg-amber-400 flex items-center justify-end p-4">
+              <WarehouseProvider>
+                {/* <div className=" h-20 w-full bg-amber-400 flex items-center justify-end p-4">
                 <ThemeToggle />
               </div> */}
-              <Header />
-              {children}
+                <Header />
+                {children}
+              </WarehouseProvider>
               <Toaster />
             </AuthProvider>
           </NextIntlClientProvider>

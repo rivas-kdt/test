@@ -278,8 +278,7 @@ const DashboardContent = () => {
                   <ChartTooltip
                     content={
                       <ChartTooltipContent
-                        formatter={(value, props) => {
-                          console.log(props);
+                        formatter={(value) => {
                           return (
                             <div className=" flex items-center gap-2">
                               <div className={` h-2 w-2`}></div>

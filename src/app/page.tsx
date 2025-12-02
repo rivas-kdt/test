@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const isMobile = useIsMobile();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isMobile !== undefined) {

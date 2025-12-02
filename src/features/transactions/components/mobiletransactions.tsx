@@ -58,7 +58,7 @@ const TransactionMobile = () => {
     );
 
   return (
-    <div className="fixed flex flex-col w-screen min-h-screen p-4 pt-20 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-y-auto">
+    <div className="fixed flex flex-col w-screen min-h-screen p-4 pt-20 bg-linear-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-y-auto">
       {/* Back Button */}
       <Button
         variant="ghost"

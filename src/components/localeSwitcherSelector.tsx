@@ -44,17 +44,17 @@ export default function LocaleSwitcherSelect({
         <Select.Portal>
           <Select.Content
             align="end"
-            className="min-w-[8rem] overflow-hidden rounded-sm bg-background text-foreground py-1 shadow-md border z-20"
+            className="min-w-32 overflow-hidden rounded-sm bg-background text-foreground py-1 shadow-md border z-20"
             position="popper"
           >
             <Select.Viewport>
               {items.map((item) => (
                 <Select.Item
                   key={item.value}
-                  className="flex items-center px-3 py-2 text-base data-[highlighted]:bg-foreground/10 cursor-pointer"
+                  className="flex items-center px-3 py-2 text-base data-highlighted:bg-foreground/10 cursor-pointer"
                   value={item.value}
                 >
-                  <div className="mr-2 w-[1rem]">
+                  <div className="mr-2 w-4">
                     {item.value === defaultValue && (
                       <CheckIcon className="h-5 w-5" />
                     )}

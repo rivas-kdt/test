@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { shipParts } from "../services/shipParts";
 import { getStockedParts } from "../services/getStockedParts";
 import toast from "react-hot-toast";
+import { useWarehouse } from "@/context/warehouseContext";
 
 export function useShipHooks({
   t,
@@ -19,6 +20,8 @@ export function useShipHooks({
   const [loading, setLoading] = useState<boolean>(false);
   const [fetching, setFetching] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
+
+  const { warehouseId } = useWarehouse();
 
   useEffect(() => {
     fetchStockedParts();
@@ -125,7 +128,6 @@ export function useShipHooks({
   const fetchStockedParts = async () => {
     setFetching(true);
     try {
-      const warehouseId = sessionStorage.getItem("selectedWarehouseId");
       if (!warehouseId) {
         toast.error(t("noWarehouseID"));
         throw new Error("Warehouse ID not found in session storage");
@@ -133,6 +135,7 @@ export function useShipHooks({
       const response = await getStockedParts(warehouseId);
       if (!response || response.length === 0) {
         toast.error(t("noStockedForWarehouse"));
+        console.log("No stocked parts found for warehouse ID:", warehouseId);
         throw new Error("No stocked parts found for the given warehouse");
       }
       const formattedResponse = response.map((part: any) => ({
