@@ -68,27 +68,27 @@ export default function StockView() {
         </Card>
       ) : (
         <div className="flex gap-2 w-full mb-4">
-          {/* <Button
+          <Button
             onClick={() => setScanning(true)}
             className="bg-primary text-md w-full h-[50px]"
           >
             <Camera className="mr-2" />
             {t("scanqr")}
-          </Button> */}
+          </Button>
 
           {/* Manual simulation button */}
-          <Button
+          {/* <Button
             variant="outline"
             className="h-[50px] w-full"
             onClick={() => setSimulateDialog(true)}
           >
             Simulate QR
-          </Button>
+          </Button> */}
         </div>
       )}
 
       {/* Simulate QR Dialog */}
-      <Dialog open={simulateDialog} onOpenChange={setSimulateDialog}>
+      {/* <Dialog open={simulateDialog} onOpenChange={setSimulateDialog}>
         <DialogContent className="max-w-md">
           <DialogTitle>Simulate QR Scan</DialogTitle>
           <p className="text-sm text-muted-foreground mb-2">
@@ -117,7 +117,7 @@ export default function StockView() {
             Apply
           </Button>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Scanned Items Table */}
       <div className="relative max-h-[500px] overflow-auto">

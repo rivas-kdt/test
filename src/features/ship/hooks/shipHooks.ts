@@ -127,29 +127,35 @@ export function useShipHooks({
 
   const fetchStockedParts = async () => {
     setFetching(true);
+
     try {
       if (!warehouseId) {
         toast.error(t("noWarehouseID"));
         throw new Error("Warehouse ID not found in session storage");
       }
+
       const response = await getStockedParts(warehouseId);
+
+      setFetching(false);
+
       if (!response || response.length === 0) {
-        toast.error(t("noStockedForWarehouse"));
-        console.log("No stocked parts found for warehouse ID:", warehouseId);
+        toast.error(t("noStockedForWarehouse"), { id: "no-stocked" });
         throw new Error("No stocked parts found for the given warehouse");
       }
+
       const formattedResponse = response.map((part: any) => ({
         ...part,
         selected: false,
         added: false,
         ship_quantity: 0,
       }));
+
       setStockedParts(formattedResponse);
     } catch (error: any) {
+      setFetching(false);
+
       toast.error(error.message || t("failedFetchForWarehouse"));
       setError(error.message || "Failed to fetch stocked parts");
-    } finally {
-      setFetching(false);
     }
   };
 
