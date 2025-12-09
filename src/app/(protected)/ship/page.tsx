@@ -319,7 +319,7 @@ export default function ShippedView() {
                           theme === "dark" ? "#131D34" : "#ffffff",
                       }}
                     >
-                      {t("quantity")}
+                      {t("stock")}
                     </TableHead>
                     <TableHead
                       style={{
@@ -327,7 +327,7 @@ export default function ShippedView() {
                           theme === "dark" ? "#131D34" : "#ffffff",
                       }}
                     >
-                      {t("th5")}
+                      {t("quantity")}
                     </TableHead>
                     <TableHead
                       className="w-[80px]"

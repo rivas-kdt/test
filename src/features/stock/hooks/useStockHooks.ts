@@ -20,7 +20,8 @@ export function useStockActions() {
 
     try {
       const values = data.split(",");
-      if (values.length < 7) {
+      console.log(values);
+      if (values.length < 6) {
         toast.error("QR code format is incorrect.");
         return;
       }
