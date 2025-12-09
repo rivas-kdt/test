@@ -135,7 +135,7 @@ const TransactionMobile = () => {
                       {new Date(item.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <Table>
+                  <Table style={{ maxHeight: "100%" }}>
                     <TableHeader>
                       <TableRow>
                         <TableHead>{t("lotNo")}</TableHead>

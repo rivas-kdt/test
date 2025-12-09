@@ -71,7 +71,7 @@ export default function EmailPage() {
       </p>
       <Card>
         <CardContent>
-          <Table>
+          <Table style={{ maxHeight: "100%" }}>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("lotNo")}.</TableHead>

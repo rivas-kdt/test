@@ -125,7 +125,7 @@ export function TransactionTable<TData, TValue>({
                 <Skeleton className=" h-[250px] w-full" />
               </>
             ) : (
-              <Table>
+              <Table style={{ maxHeight: "100%" }}>
                 <TableHeader>
                   {table.getHeaderGroups().map((hg) => (
                     <TableRow key={hg.id}>

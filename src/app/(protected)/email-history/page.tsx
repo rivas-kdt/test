@@ -140,7 +140,7 @@ export default function EmailHistory() {
                 </p>
               </CardHeader>
               <CardContent className="grid gap-2 text-sm">
-                <Table>
+                <Table style={{ maxHeight: "100%" }}>
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t("lotNo")}.</TableHead>

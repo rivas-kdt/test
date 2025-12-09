@@ -430,7 +430,10 @@ const DashboardContent = () => {
                 <AlertCircle size={18} /> Failed to load stocked list
               </p>
             ) : (
-              <Table className="min-w-full table-auto">
+              <Table
+                className="min-w-full table-auto"
+                style={{ maxHeight: "100%" }}
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("lotNo")}</TableHead>
@@ -481,7 +484,10 @@ const DashboardContent = () => {
                 <AlertCircle size={18} /> Failed to load shipped list
               </p>
             ) : (
-              <Table className="min-w-full table-auto">
+              <Table
+                className="min-w-full table-auto"
+                style={{ maxHeight: "100%" }}
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("lotNo")}</TableHead>

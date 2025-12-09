@@ -151,12 +151,13 @@ main {
     height: 320px;
     position: relative;
     transform-style: preserve-3d;
-    scale: 2;
+    scale: 0.5;
   }
 
   @media (max-width: 480px) {
     .loader {
       zoom: 0.44;
+      scale: 2;
     }
   }
 

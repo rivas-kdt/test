@@ -4,12 +4,16 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({ className, style, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
       className="relative w-full overflow-x-auto"
-      style={{ maxHeight: "30vh", overflowY: "auto" }}
+      style={{
+        maxHeight: "30vh",
+        overflowY: "auto",
+        ...style, // <-- parent overrides default
+      }}
     >
       <table
         data-slot="table"

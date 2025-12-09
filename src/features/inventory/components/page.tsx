@@ -75,7 +75,7 @@ export function InventoryTable<TData, TValue>({
 
   const uniqueLocations = React.useMemo(() => {
     const locations = new Set<string>();
-    warehouse?.forEach((item : any) => {
+    warehouse?.forEach((item: any) => {
       if (item.warehouse) {
         locations.add(item.warehouse);
       }
@@ -153,7 +153,7 @@ export function InventoryTable<TData, TValue>({
                 <Skeleton className=" h-[250px] w-full" />
               </>
             ) : (
-              <Table>
+              <Table style={{ maxHeight: "100%" }}>
                 <TableHeader>
                   {table.getHeaderGroups().map((hg) => (
                     <TableRow key={hg.id}>
