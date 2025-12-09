@@ -130,7 +130,7 @@ export function useShipHooks({
 
     try {
       if (!warehouseId) {
-        toast.error(t("noWarehouseID"));
+        // toast.error(t("noWarehouseID"));
         throw new Error("Warehouse ID not found in session storage");
       }
 
@@ -139,7 +139,7 @@ export function useShipHooks({
       setFetching(false);
 
       if (!response || response.length === 0) {
-        toast.error(t("noStockedForWarehouse"), { id: "no-stocked" });
+        // toast.error(t("noStockedForWarehouse"), { id: "no-stocked" });
         throw new Error("No stocked parts found for the given warehouse");
       }
 
