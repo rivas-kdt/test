@@ -34,7 +34,14 @@
       "OCTOBER  ": "Oct",
       "NOVEMBER ": "Nov",
       "DECEMBER ": "Dec"
-    }
+    },
+
+    "failedTotalData": "Failed to load total data",
+    "failedShipData": "Failed to load shipped data",
+    "failedStockData": "Failed to load stocked data",
+    "failedInventoryData": "Failed to load inventory data",
+    "failedStockList": "Failed to load stocked list",
+    "failedShipList": "Failed to load shipped list"
   },
   "LocaleSwitcher": {
     "jp": "日本語",

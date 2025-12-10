@@ -34,7 +34,14 @@
       "OCTOBER  ": "10月",
       "NOVEMBER ": "11月",
       "DECEMBER ": "12月"
-    }
+    },
+
+    "failedTotalData": "総データの読み込みに失敗しました",
+    "failedShipData": "出荷データの読み込みに失敗しました",
+    "failedStockData": "入庫データの読み込みに失敗しました",
+    "failedInventoryData": "在庫データの読み込みに失敗しました",
+    "failedStockList": "入庫リストの読み込みに失敗しました",
+    "failedShipList": "出荷リストの読み込みに失敗しました"
   },
   "LocaleSwitcher": {
     "jp": "日本語",

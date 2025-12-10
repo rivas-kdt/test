@@ -125,7 +125,7 @@ const DashboardContent = () => {
             ) : totalError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}
-                <AlertCircle size={18} /> Failed to load total data
+                <AlertCircle size={18} /> {t("failedTotalData")}
               </p>
             ) : (
               <>
@@ -170,7 +170,7 @@ const DashboardContent = () => {
             ) : shippedError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}
-                <AlertCircle size={18} /> Failed to load shipped data
+                <AlertCircle size={18} /> {t("failedShipData")}
               </p>
             ) : (
               <>
@@ -213,7 +213,7 @@ const DashboardContent = () => {
             ) : stockedError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}
-                <AlertCircle size={18} /> Failed to load stocked data
+                <AlertCircle size={18} /> {t("failedStockData")}
               </p>
             ) : (
               <>
@@ -259,7 +259,7 @@ const DashboardContent = () => {
               <Skeleton className="h-[calc(40vh-80px)] w-full" />
             ) : inventoryError ? (
               <p className="text-destructive flex items-center gap-2">
-                <AlertCircle size={18} /> Failed to load inventory data
+                <AlertCircle size={18} /> {t("failedInventoryData")}
               </p>
             ) : (
               <ChartContainer
@@ -427,7 +427,7 @@ const DashboardContent = () => {
             ) : recentStockedError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}
-                <AlertCircle size={18} /> Failed to load stocked list
+                <AlertCircle size={18} /> {t("failedStockList")}
               </p>
             ) : (
               <Table
@@ -481,7 +481,7 @@ const DashboardContent = () => {
             ) : recentShippedError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}
-                <AlertCircle size={18} /> Failed to load shipped list
+                <AlertCircle size={18} /> {t("failedShipList")}
               </p>
             ) : (
               <Table
