@@ -253,7 +253,10 @@
     "sending": "Sending Email...",
     "send": "Send Request",
     "returnLogin": "Login Intsead",
-    "clickHere": "Click here"
+    "clickHere": "Click here",
+    "plsEnterEmail": "Please enter your email address.",
+    "plsValidEmail": "Please enter a valid email address.",
+    "error": "An error occurred. Please try again."
   },
   "reset-password": {
     "mon": "Mon",
@@ -261,11 +264,14 @@
     "resetExpire": "Reset link expired. Please request a new one.",
     "resetPass": "Reset Password",
     "newPass": "New Password",
-    "ph1": "Enter new password",
+    "enterPass": "Enter new password",
     "confirmPass": "Confirm New Password",
-    "ph2": "Confirm new password",
+    "confirmNew": "Confirm New password",
     "reset": "Resetting...",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "fillFields": "Please fill in both fields.",
+    "matchFields": "Passwords do not match.",
+    "invalid": "Invalid or missing reset link parameters."
   },
   "addNewUser": {
     "header": "Add New User",
