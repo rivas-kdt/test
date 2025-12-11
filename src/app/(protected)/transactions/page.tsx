@@ -2,6 +2,7 @@
 
 import Loader from "@/components/ui/loader";
 import WarehouseProvider, { useWarehouse } from "@/context/warehouseContext";
+import { ProtectedRoute } from "@/features/auth/components/protected-route";
 import TransactionDesktop from "@/features/transactions/components/desktoptransactions";
 import TransactionMobile from "@/features/transactions/components/mobiletransactions";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -25,15 +26,9 @@ function Email() {
   }
 
   return (
-    <>
-      {isMobile ? (
-        <WarehouseProvider>
-          <TransactionMobile />
-        </WarehouseProvider>
-      ) : (
-        <TransactionDesktop />
-      )}
-    </>
+    <ProtectedRoute>
+      {isMobile ? <TransactionMobile /> : <TransactionDesktop />}
+    </ProtectedRoute>
   );
 }
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import Loader from "@/components/ui/loader";
+import { ProtectedRoute } from "@/features/auth/components/protected-route";
 import { InventoryTable } from "@/features/inventory/components/page";
 import { useInventory } from "@/features/inventory/hooks/useInventory";
 import { ColumnDef } from "@tanstack/react-table";
@@ -86,17 +88,29 @@ const InventoryPage = () => {
     },
   ];
 
+  if (inventoryLoading) {
+    return (
+      <ProtectedRoute>
+        <div className="flex justify-center items-center h-screen">
+          <Loader />
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
   return (
-    <main className="  p-4 gap-2 bg-linear-to-b from-primary/10 to-background">
-      <div className="  h-full w-full flex items-center">
-        <InventoryTable
-          columns={InventoryColumns}
-          data={inventory}
-          loading={inventoryLoading}
-          warehouse={warehouse}
-        />
-      </div>
-    </main>
+    <ProtectedRoute>
+      <main className="  p-4 gap-2 bg-linear-to-b from-primary/10 to-background">
+        <div className="  h-full w-full flex items-center">
+          <InventoryTable
+            columns={InventoryColumns}
+            data={inventory}
+            loading={inventoryLoading}
+            warehouse={warehouse}
+          />
+        </div>
+      </main>
+    </ProtectedRoute>
   );
 };
 

@@ -14,6 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import Loader from "@/components/ui/loader";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -111,6 +112,17 @@ const DashboardContent = () => {
   );
   const maxY = Math.max(maxStocked, maxShipped) * 1.05;
 
+  const loading =
+    transactionLoading ||
+    totalLoading ||
+    shippedLoading ||
+    recentShippedLoading ||
+    stockedLoading ||
+    recentStockedLoading ||
+    inventoryLoading;
+
+  if (loading) return <Loader />;
+
   return (
     <main className="space-y-2 flex flex-col p-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
@@ -121,7 +133,7 @@ const DashboardContent = () => {
           </CardHeader>
           <CardContent className="flex justify-between items-center">
             {totalLoading ? (
-              <Skeleton className="h-[60px] w-full" />
+              <Skeleton className="h-[60px] w-1/2" />
             ) : totalError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}
@@ -166,7 +178,7 @@ const DashboardContent = () => {
           </CardHeader>
           <CardContent className="flex justify-between items-center">
             {shippedLoading ? (
-              <Skeleton className="h-[60px] w-full" />
+              <Skeleton className="h-[60px] w-1/2" />
             ) : shippedError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}
@@ -209,7 +221,7 @@ const DashboardContent = () => {
           </CardHeader>
           <CardContent className="flex justify-between items-center">
             {stockedLoading ? (
-              <Skeleton className="h-[60px] w-full" />
+              <Skeleton className="h-[60px] w-1/2" />
             ) : stockedError ? (
               <p className="text-destructive flex items-center gap-2">
                 {/* TRANSLATEME Create translation for this */}

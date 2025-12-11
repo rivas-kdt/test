@@ -18,6 +18,7 @@ import { RecipientsTab } from "@/features/admin/components/recipientsTab";
 import { WarehouseTab } from "@/features/admin/components/warehouseTab";
 import { EditUserDialog } from "@/features/admin/components/editUserDialog";
 import { EditWarehouseDialog } from "@/features/admin/components/editWarehouseDialog";
+import Loader from "@/components/ui/loader";
 
 export type Users = {
   id: string;
@@ -173,6 +174,18 @@ export default function AdminPage() {
       },
     },
   ];
+
+  const loading = userLoading || warehouseLoading || recipientLoading;
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="flex justify-center items-center h-screen">
+          <Loader />
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute>

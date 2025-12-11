@@ -7,6 +7,7 @@ import { TransactionTable } from "./ui/transactionstab";
 import { Imagedialog } from "./ui/imgDialog";
 import { fetchParts, getTransactions } from "../services/getTransactions";
 import { useTransactionHooks } from "../hooks/useTransactions";
+import Loader from "@/components/ui/loader";
 
 export type Transaction = {
   lot_no: string;
@@ -130,6 +131,10 @@ const TransactionDesktop = () => {
       },
     },
   ];
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <main className="p-4 flex flex-col bg-linear-to-b from-primary/10 to-background">
