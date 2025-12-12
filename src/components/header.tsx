@@ -1,86 +1,62 @@
 "use client";
 
-import { ChevronDown, Home, LogOut, Menu, Package } from "lucide-react";
-import { Button } from "./ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { ThemeToggle } from "./theme-toggle";
-import { useTheme } from "next-themes";
-import { useIsMobile } from "../hooks/useMobile";
+import { Home, LogOut, Menu, Package } from "lucide-react";
+
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Skeleton } from "./ui/skeleton";
-import LocaleSwitcher from "./localeSwitcher";
 import { useTranslations } from "next-intl";
-// import { deleteSession } from "@/actions/cookieHandler";
-import { Loader2 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { LanguageIcon } from "@heroicons/react/24/solid";
-import { Switch } from "./ui/switch";
-import LocaleSwitcherSelect from "./localeSwitcherSelector";
-import LocaleSwitcherDropdown from "./localeSwitcherDropdown";
-import { deleteSession } from "@/lib/cookieHandler";
+
 import { useAuth } from "@/features/auth/hooks/auth-context";
+import { useIsMobile } from "@/hooks/useMobile";
+
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
+
+import LocaleSwitcher from "@/components/localeSwitcher";
+import LocaleSwitcherDropdown from "@/components/localeSwitcherDropdown";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Header() {
   const router = useRouter();
-  const { logout } = useAuth();
   const pathname = usePathname();
+
+  const { logout } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const isMobile = useIsMobile();
+
   const t = useTranslations("Header");
-  const [loading2, setLoading2] = useState(true);
-  const [menuLoading, setMenuLoading] = useState(false);
 
-  useEffect(() => {
-    if (isMobile !== undefined) {
-      setLoading2(false);
-    }
-  }, [isMobile]);
+  const hiddenPages = ["/login", "/reset-password", "/confirm-email"];
+  if (hiddenPages.includes(pathname)) return null;
 
-  useEffect(() => {
-    if (pathname === "/transactions") {
-      setMenuLoading(false);
-    }
-  }, [pathname]);
+  const NAV_LINKS = [
+    { href: "/admin", label: t("admin") },
+    { href: "/", label: t("dashboard") },
+    { href: "/inventory", label: t("inventory") },
+    { href: "/transactions", label: t("transaction") },
+    { href: "/email-history", label: t("email-history") },
+  ];
 
-  if (
-    pathname === "/login" ||
-    pathname === "/reset-password" ||
-    pathname === "/confirm-email"
-  ) {
-    return null;
-  }
+  const handleLogout = () => logout();
 
-  const handleLogout = async () => {
-    logout();
-  };
-
-  if (loading2) {
-    return (
-      <div className="w-screen h-20 flex items-center justify-between p-4">
-        <Skeleton className=" h-full w-[200px]" />
-        <Skeleton className=" h-full w-[600px]" />
-        <Skeleton className=" h-full w-[300px]" />
-      </div>
-    );
-  }
-
-  // Mobile Header
+  // ---------------------------------------------------------------------------
+  // MOBILE HEADER
+  // ---------------------------------------------------------------------------
   if (isMobile) {
     return (
       <>
-        <div className="fixed top-0 left-0 w-full z-50 px-4 pt-5 pb-.5 bg-background border-b border-b-gray-300">
-          <div className="flex justify-between items-center mb-2">
-            <div className="relative inline-block">
-              <div className="text-3xl font-bold tracking-tighter text-primary flex">
+        <header className="fixed top-0 left-0 w-full z-50 px-4 py-3 bg-background border-b">
+          <div className="flex justify-between items-center">
+            {/* Logo */}
+            <div
+              className="cursor-pointer select-none"
+              onClick={() => router.push("/")}
+            >
+              <div className="text-3xl font-bold tracking-tight text-primary flex">
                 <span>X</span>
-                <span className="relative opacity-80">
+                <span className="opacity-80 relative">
                   Mo
                   <span className="relative inline-block">
                     n
@@ -90,192 +66,171 @@ export default function Header() {
                   </span>
                 </span>
               </div>
-              <div>
-                <p className="text-xs">{t("p1")}</p>
-              </div>
+              <p className="text-xs text-muted-foreground">{t("p1")}</p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full bg-muted hover:bg-muted/50 text-primary hover:text-muted-foreground/50 backdrop-blur-sm border-muted cursor-pointer"
-                  >
-                    <Menu className="h-[22px] w-[22px] text-primary" />
-                  </Button>
-                </SheetTrigger>
+            {/* Menu Drawer */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full bg-muted hover:bg-muted/70"
+                >
+                  <Menu className="h-5 w-5 text-primary" />
+                </Button>
+              </SheetTrigger>
 
-                <SheetContent side="right" className="w-64">
-                  <div className="p-4">
-                    <div className="flex flex-col gap-4 pb-4">
-                      <button
-                        onClick={() => router.push("/")}
-                        className={`flex items-center gap-2 ${
-                          pathname === "/"
-                            ? "text-primary border-primary decoration-2 underline-offset-4 font-medium"
-                            : ""
-                        }`}
-                      >
-                        <div
-                          className={`p-2 border rounded-full ${
-                            pathname === "/" ? "border-primary" : "border-muted"
-                          }`}
-                        >
-                          <Home className="h-[1.2rem] w-[1.2rem]" />
-                        </div>
-                        {t("home")}
-                      </button>
+              <SheetContent side="right" className="w-64">
+                <div className="flex flex-col h-full">
+                  {/* Navigation */}
+                  <nav className="flex flex-col gap-4 py-4">
+                    <MobileNavLink
+                      icon={<Home className="h-5 w-5" />}
+                      label={t("home")}
+                      href="/"
+                      active={pathname === "/"}
+                      router={router}
+                    />
 
-                      <button
-                        onClick={() => {
-                          setMenuLoading(true);
-                          router.push("/transactions");
-                        }}
-                        className={`flex items-center gap-2 ${
-                          pathname === "/transactions"
-                            ? "text-primary border-primary decoration-2 underline-offset-4 font-medium"
-                            : ""
-                        }`}
-                      >
-                        <div
-                          className={`p-2 border rounded-full ${
-                            pathname === "/transactions"
-                              ? "border-primary"
-                              : "border-muted"
-                          }`}
-                        >
-                          <Package className="h-[1.2rem] w-[1.2rem]" />
-                        </div>
-                        {t("transaction")}
-                      </button>
-                    </div>
-                    <hr className="border-gray-300" />
-                    <div className="py-4">
-                      <div className="flex items-center justify-between gap-2 pb-4">
-                        <div className="flex items-center gap-2">
-                          <ThemeToggle />
-                          <span className="text-sm capitalize">
-                            Theme: <strong>{resolvedTheme}</strong>
-                          </span>
-                        </div>
-                        <Switch
-                          checked={resolvedTheme === "dark"}
-                          onCheckedChange={() =>
-                            setTheme(
-                              resolvedTheme === "light" ? "dark" : "light"
-                            )
-                          }
-                        />
+                    <MobileNavLink
+                      icon={<Package className="h-5 w-5" />}
+                      label={t("transaction")}
+                      href="/transactions"
+                      active={pathname === "/transactions"}
+                      router={router}
+                    />
+                  </nav>
+
+                  <hr className="my-2" />
+
+                  {/* Theme & Locale */}
+                  <div className="flex flex-col gap-4 py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ThemeToggle />
+                        <span className="text-sm">
+                          {t("theme")}: <strong>{resolvedTheme}</strong>
+                        </span>
                       </div>
-                      <LocaleSwitcherDropdown />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 w-full ">
-                    <div className="border-t border-gray-300 px-4 py-4">
-                      <button
-                        // onClick={handleLogout}
-                        className="flex items-center gap-2 p-2"
-                      >
-                        <LogOut className="h-[1.2rem] w-[1.2rem]" />
 
-                        {t("logout")}
-                      </button>
+                      <Switch
+                        checked={resolvedTheme === "dark"}
+                        onCheckedChange={() =>
+                          setTheme(resolvedTheme === "light" ? "dark" : "light")
+                        }
+                      />
                     </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        </div>
 
-        {menuLoading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-black/80">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                    <LocaleSwitcherDropdown />
+                  </div>
+
+                  {/* Logout */}
+                  <div className="mt-auto border-t pt-4">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 p-2 text-destructive"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      {t("logout")}
+                    </button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
-        )}
+        </header>
+        <div className="h-[80px]" /> {/* spacing under fixed header */}
       </>
     );
   }
 
-  // Desktop Header
+  // ---------------------------------------------------------------------------
+  // DESKTOP HEADER
+  // ---------------------------------------------------------------------------
   return (
-    <div className="h-[80px] w-full flex justify-between items-center p-4">
-      <div className="flex w-full gap-16">
-        <div className="flex items-center">
-          <div
-            className="relative mr-4 cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            <div className="text-4xl font-bold tracking-tighter text-primary">
-              <span>X</span>
-              <span className="opacity-80">{t("mon")}</span>
-            </div>
-            <div className="absolute -top-2 -right-2 bg-accent text-background text-xs px-1.5 py-0.5 rounded-full font-bold">
-              KDT
-            </div>
-          </div>
-          <div>
-            <h1 className=" md:hidden lg:block text-xl font-bold">{t("p1")}</h1>
-          </div>
+    <header className="h-20 w-full flex items-center justify-between p-4 border-b bg-background">
+      {/* Logo */}
+      <div className="relative cursor-pointer" onClick={() => router.push("/")}>
+        <div className="text-4xl font-bold tracking-tight text-primary">
+          <span>X</span>
+          <span className="opacity-80">{t("mon")}</span>
         </div>
-        <nav className="flex items-center space-x-4 lg:space-x-6">
-          {[
-            { href: "/admin", label: t("admin") },
-            { href: "/", label: t("dashboard") },
-            { href: "/inventory", label: t("inventory") },
-            { href: "/transactions", label: t("transaction") },
-            { href: "/email-history", label: t("email-history") },
-          ].map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`font-medium transition-colors hover:text-primary ${
-                  isActive
-                    ? "text-primary border-b-2 border-primary"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className=" flex-1 flex justify-end gap-2">
-          <LocaleSwitcher />
-          <ThemeToggle />
-          <Button
-            size={"default"}
-            // onClick={handleLogout}
-            className=" bg-destructive hover:bg-destructive/80"
-          >
-            <LogOut className="h-[1.2rem] w-[1.2rem] p-.5" />
-            <span className=" md:hidden lg:block">{t("logout")}</span>
-          </Button>
-          {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon">
-                <Menu className="h-8 w-8 text-primary-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <ThemeToggle />
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>
-                <div className="p-2 border border-muted rounded-full">
-                  <LogOut className="h-[1.2rem] w-[1.2rem] p-.5" />
-                </div>
-                <p className="ml-1">Logout</p>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
+        <div className="absolute -top-2 -right-2 bg-accent text-background text-xs px-1.5 py-0.5 rounded-full font-bold">
+          KDT
         </div>
       </div>
-    </div>
+
+      {/* Desktop Nav */}
+      <nav className="flex gap-6">
+        {NAV_LINKS.map((link) => {
+          const active = pathname === link.href;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`transition font-medium ${
+                active
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-primary"
+              }`}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Controls */}
+      <div className="flex gap-2 items-center">
+        <LocaleSwitcher />
+        <ThemeToggle />
+
+        <Button
+          size="default"
+          onClick={handleLogout}
+          className="bg-destructive hover:bg-destructive/80"
+        >
+          <LogOut className="h-[1.2rem] w-[1.2rem] mr-1" />
+          {t("logout")}
+        </Button>
+      </div>
+    </header>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Small Extracted Component for Clean Mobile Nav Buttons
+// ---------------------------------------------------------------------------
+
+function MobileNavLink({
+  icon,
+  label,
+  href,
+  active,
+  router,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  active: boolean;
+  router: any;
+}) {
+  return (
+    <button
+      onClick={() => router.push(href)}
+      className={`flex items-center gap-3 text-left ${
+        active ? "text-primary font-medium" : ""
+      }`}
+    >
+      <div
+        className={`p-2 border rounded-full ${
+          active ? "border-primary" : "border-muted"
+        }`}
+      >
+        {icon}
+      </div>
+      {label}
+    </button>
   );
 }

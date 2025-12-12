@@ -1,51 +1,61 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
-import pool from "@/lib/db";
-import { encrypt } from "@/lib/jwt";
-import bcrypt from "bcryptjs";
-import { getTranslations } from "next-intl/server";
-import { User } from "../hooks/auth-context";
 
-export async function login(username: string, password: string) {
+import pool from "@/lib/db";
+import bcrypt from "bcryptjs";
+import { encrypt } from "@/lib/jwt";
+import { getTranslations } from "next-intl/server";
+import { AuthUser, LoginResponse } from "@/types/auth";
+
+export async function login(
+  username: string,
+  password: string
+): Promise<LoginResponse> {
   const t = await getTranslations("loginFunction");
+
   try {
     const client = await pool.connect();
+
     const result = await client.query(
-      "SELECT * FROM users u LEFT JOIN worker_location wl ON u.id = wl.user_id LEFT JOIN warehouse w ON wl.warehouse_id=w.id WHERE username = $1",
+      `SELECT u.*, w.id AS warehouse_id, w.warehouse AS warehouse_name, w.location
+       FROM users u
+       LEFT JOIN worker_location wl ON u.id = wl.user_id
+       LEFT JOIN warehouse w ON wl.warehouse_id = w.id
+       WHERE username = $1`,
       [username]
     );
+
     client.release();
+
     if (result.rows.length === 0) {
-      const errorMessage = t("userNotFound");
-      throw new Error(errorMessage);
-    }
-    const isValidPassword = await bcrypt.compare(
-      password,
-      result.rows[0].password_hash
-    );
-    if (!isValidPassword) {
-      const errorMessage = t("incorrectPassword");
-      throw new Error(errorMessage);
+      throw new Error(t("userNotFound"));
     }
 
-    const user: User = {
-      userId: result.rows[0].uuid,
-      email: result.rows[0].email,
-      role: result.rows[0].role,
-      warehouse: {
-        id: result.rows[0].warehouse_id,
-        name: result.rows[0].warehouse,
-        location: result.rows[0].location,
-      },
-      username: result.rows[0].username,
+    const row = result.rows[0];
+
+    const isValidPassword = await bcrypt.compare(password, row.password_hash);
+    if (!isValidPassword) {
+      throw new Error(t("incorrectPassword"));
+    }
+
+    const user: AuthUser = {
+      userId: row.uuid,
+      email: row.email,
+      role: row.role,
+      username: row.username,
+      warehouse: row.warehouse_id
+        ? {
+            id: row.warehouse_id,
+            name: row.warehouse_name,
+            location: row.location,
+          }
+        : null,
     };
-    // const expires = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
     const token = await encrypt({ user });
 
     return { token, user };
   } catch (error: any) {
     console.error("Error during login:", error);
-    const fallbackError = t("fallbackError");
-    throw new Error(error.message || fallbackError);
+    throw new Error(error.message || t("fallbackError"));
   }
 }

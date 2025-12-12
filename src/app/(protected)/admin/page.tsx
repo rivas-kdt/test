@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/app/(protected)/admin/page.tsx
 "use client";
 import { ProtectedRoute } from "@/features/auth/components/protected-route";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,39 +20,20 @@ import { WarehouseTab } from "@/features/admin/components/warehouseTab";
 import { EditUserDialog } from "@/features/admin/components/editUserDialog";
 import { EditWarehouseDialog } from "@/features/admin/components/editWarehouseDialog";
 import Loader from "@/components/ui/loader";
-
-export type Users = {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  location: string | null;
-  warehouse: string | null;
-  createdAt: string;
-} | null;
-
-export type Recipients = {
-  id: string;
-  email: string;
-  isactive: boolean;
-  created_at: string;
-};
-
-export type Warehouse = {
-  id: string;
-  warehouse: string;
-  location: string;
-  workers: number;
-  created_at: string | number | Date;
-} | null;
+import { User, Recipient, Warehouse } from "@/types/admin";
+import { useEffect } from "react";
 
 export default function AdminPage() {
   const { users, userLoading, refetchuser } = useUserHooks();
   const { warehouseWorker, warehouseLoading, refetchwarehouse } =
     useWarehouseHooks();
-  const { recipients, recipientLoading, handleActiveChange } =
-    useRecipientHooks();
-  const [selectedUser, setSelectedUser] = useState<Users | null>(null);
+  const {
+    recipients,
+    recipientLoading,
+    handleActiveChange,
+    refetchRecipients,
+  } = useRecipientHooks();
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(
     null
   );
@@ -61,8 +43,14 @@ export default function AdminPage() {
   const isMobile = useIsMobile();
   const router = useRouter();
   const t = useTranslations("Table");
-  console.log(recipients);
-  const userColumns: ColumnDef<Users>[] = [
+
+  useEffect(() => {
+    if (isMobile) {
+      router.replace("/"); // or any page you want to redirect to
+    }
+  }, [isMobile, router]);
+
+  const userColumns: ColumnDef<User>[] = [
     {
       accessorKey: "username",
       header: t("username"),
@@ -102,7 +90,7 @@ export default function AdminPage() {
     },
   ];
 
-  const recipientsColumns: ColumnDef<Recipients>[] = [
+  const recipientsColumns: ColumnDef<Recipient>[] = [
     {
       accessorKey: "email",
       header: t("email"),
@@ -112,14 +100,14 @@ export default function AdminPage() {
       header: t("status"),
       cell: ({ row, table }) => {
         const recipient = row.original;
-        const onActiveChange = (table.options.meta as any).onActiveChange;
+        const toggle = table.options.meta?.onActiveChange;
+
         return (
           <Switch
             checked={recipient.isactive}
             onCheckedChange={(checked) => {
-              if (onActiveChange) onActiveChange(recipient.id, checked);
+              toggle?.(recipient.id, checked);
             }}
-            aria-label={`Toggle active status for ${recipient.email}`}
           />
         );
       },
@@ -212,6 +200,7 @@ export default function AdminPage() {
               data={recipients}
               loading={recipientLoading}
               onActiveChange={handleActiveChange}
+              fetchRecipientData={refetchRecipients}
             />
           </TabsContent>
           <TabsContent value="warehouses" className="space-y-2">

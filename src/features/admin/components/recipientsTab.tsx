@@ -1,3 +1,4 @@
+// src/features/admin/components/recipientsTab.tsx
 "use client";
 import React from "react";
 import {
@@ -39,6 +40,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   loading: boolean;
   onActiveChange: (id: string, active: boolean) => Promise<void>;
+  fetchRecipientData: () => void;
 }
 
 export function RecipientsTab<TData, TValue>({
@@ -46,6 +48,7 @@ export function RecipientsTab<TData, TValue>({
   data,
   loading,
   onActiveChange,
+  fetchRecipientData,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -74,21 +77,17 @@ export function RecipientsTab<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      onActiveChange,
+    },
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    autoResetPageIndex: false,
     state: {
       sorting,
       columnFilters,
       globalFilter,
-    },
-    meta: {
-      onActiveChange,
     },
   });
 
@@ -207,6 +206,7 @@ export function RecipientsTab<TData, TValue>({
       <AddRecipientForm
         open={addRecipientOpen}
         onOpenChange={setAddRecipientOpen}
+        onRecipientAdded={fetchRecipientData}
       />
     </>
   );

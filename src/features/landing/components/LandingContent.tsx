@@ -1,6 +1,6 @@
+// src/features/landing/components/LandingContent.tsx
 "use client";
 import React from "react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,7 +20,6 @@ import {
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/ui/loader";
-import { useLanding } from "@/features/landing/hooks/useLanding";
 import { useAuth } from "@/features/auth/hooks/auth-context";
 import { useWarehouse } from "@/context/warehouseContext";
 
@@ -30,7 +29,6 @@ const LandingContent = () => {
     warehouses,
     selectedWarehouse,
     loading,
-    location,
     warehouseId,
     handleWarehouseChange,
   } = useWarehouse();
@@ -57,10 +55,8 @@ const LandingContent = () => {
                   {t("selectWarehouse")}
                 </label>
                 <Select
-                  value={warehouseId || ""}
-                  defaultValue="Select Warehouse"
+                  value={warehouseId ?? ""}
                   onValueChange={(value) => {
-                    // setWarehouseId(value);
                     handleWarehouseChange(value);
                   }}
                   disabled={loading}
@@ -68,6 +64,7 @@ const LandingContent = () => {
                   <SelectTrigger className="flex w-full h-[50px]">
                     <SelectValue placeholder={t("selectWarehouse")} />
                   </SelectTrigger>
+
                   <SelectContent>
                     {loading ? (
                       <div className="flex items-center justify-center py-2 h-[50px] text-md">
@@ -75,7 +72,7 @@ const LandingContent = () => {
                         <span>{t("loading")}</span>
                       </div>
                     ) : (
-                      warehouses.map((warehouse: any) => (
+                      warehouses.map((warehouse) => (
                         <SelectItem
                           key={warehouse.id}
                           value={warehouse.id}

@@ -26,49 +26,30 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useShipHooks } from "@/features/ship/hooks/shipHooks";
-// import { useShippingActions } from "@/features/ship/hooks/shippingActions";
 import QrScanner from "@/components/qr-scanner";
 import toast from "react-hot-toast";
 import { useTheme } from "next-themes";
 
-// interface WarehouseItem {
-//   id: string;
-//   product_code: string;
-//   stock_no: string;
-//   lot_no: string;
-//   description: string;
-//   quantity: number;
-//   selected: boolean;
-//   ship_quantity: number | string;
-// }
-
 export default function ShippedView() {
   const router = useRouter();
-
   const [scanning, setScanning] = useState(false);
   const [highlightedItem, setHighlightedItem] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const t = useTranslations("stock/ship");
   const { theme } = useTheme();
 
-  // If user is using desktop, redirect him to /dashboard
+  // Redirect desktop users
   useEffect(() => {
-    if (isMobile === undefined) return; // wait for detection
-
-    if (!isMobile) {
-      router.push("/dashboard");
-    }
+    if (isMobile === undefined) return;
+    if (!isMobile) router.push("/dashboard");
   }, [isMobile, router]);
 
+  // Updated hook API
   const {
     loading,
-    // fetchStockedParts,
     fetching,
     stockedParts,
     toggleItemSelection,
-    // toggleItemAdded,
-    // message,
-    // error,
     shipParts,
     handleScan,
     moveSelectedItems,
@@ -81,22 +62,9 @@ export default function ShippedView() {
     setHighlightedItem,
   });
 
-  // useEffect(() => {
-  // const warehouseData = sessionStorage.getItem("selectedWarehouse");
-  // if (warehouseData) {
-  //   try {
-  //     const parsedWarehouse = JSON.parse(warehouseData);
-  //     setSelectedWarehouse(parsedWarehouse);
-  //   } catch (e) {
-  //     console.error("Error parsing warehouse data:", e);
-  //   }
-  // }
-  //   fetchStockedParts();
-  // }, [fetchStockedParts, router]);
-
   return (
     <ScrollArea className="h-screen">
-      <div className="flex flex-col w-screen p-4 pt-20  bg-linear-to-b from-primary/10 to-background">
+      <div className="flex flex-col w-screen p-4 pt-20">
         {/* Back Button */}
         <Link href="/">
           <Button
@@ -107,7 +75,9 @@ export default function ShippedView() {
             <ArrowLeft className="h-6 w-6" />
           </Button>
         </Link>
+
         <h1 className="text-2xl font-medium ml-2 mb-2">{t("ship-items")}</h1>
+
         {/* QR Scanner */}
         {scanning ? (
           <Card className="mb-4">
@@ -127,11 +97,13 @@ export default function ShippedView() {
             {t("scanqr")}
           </Button>
         )}
-        {/* Table 1: Stocked Items */}
+
+        {/* STOCKED ITEMS TABLE */}
         <Card className="mb-4">
           <CardHeader className="py-2">
             <CardTitle className="text-lg">{t("ship-title1")}</CardTitle>
           </CardHeader>
+
           <CardContent className="overflow-auto max-h-[30vh]">
             {fetching ? (
               <div className="flex justify-center items-center py-4">
@@ -139,75 +111,34 @@ export default function ShippedView() {
                 <p>{t("loading-items")}</p>
               </div>
             ) : stockedParts.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                <p>{t("no-items-warehouse")}</p>
-              </div>
+              <p className="text-center py-4 text-muted-foreground">
+                {t("no-items-warehouse")}
+              </p>
             ) : (
               <div className="relative max-h-[500px] overflow-auto">
-                <Table
-                  className="w-full min-w-[800px]"
-                  // style={{
-                  //   maxHeight: "500px",
-                  //   overflowY: "auto", // force vertical scroll
-                  //   display: "block", // required so sticky works inside
-                  // }}
-                >
+                <Table className="w-full min-w-[800px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead
                         className="sticky left-0 z-30"
                         style={{
                           backgroundColor:
-                            theme === "dark" ? "#131D34" : "#ffffff",
+                            theme === "dark" ? "#131D34" : "#fff",
                         }}
                       >
                         {t("select")}
                       </TableHead>
-                      <TableHead
-                        style={{
-                          backgroundColor:
-                            theme === "dark" ? "#131D34" : "#ffffff",
-                        }}
-                      >
-                        {t("lotNo")}
-                      </TableHead>
-                      <TableHead
-                        style={{
-                          backgroundColor:
-                            theme === "dark" ? "#131D34" : "#ffffff",
-                        }}
-                      >
-                        {t("prodNo")}
-                      </TableHead>
-                      <TableHead
-                        style={{
-                          backgroundColor:
-                            theme === "dark" ? "#131D34" : "#ffffff",
-                        }}
-                      >
-                        {t("stockNo")}
-                      </TableHead>
-                      <TableHead
-                        style={{
-                          backgroundColor:
-                            theme === "dark" ? "#131D34" : "#ffffff",
-                        }}
-                      >
-                        {t("desc")}
-                      </TableHead>
-                      <TableHead
-                        style={{
-                          backgroundColor:
-                            theme === "dark" ? "#131D34" : "#ffffff",
-                        }}
-                      >
-                        {t("quantity")}
-                      </TableHead>
+                      <TableHead>{t("lotNo")}</TableHead>
+                      <TableHead>{t("prodNo")}</TableHead>
+                      <TableHead>{t("stockNo")}</TableHead>
+                      <TableHead>{t("desc")}</TableHead>
+                      <TableHead>{t("quantity")}</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody className="whitespace-nowrap">
                     {stockedParts
-                      .filter((item) => item.quantity > 0 && !item.added)
+                      .filter((item) => item.quantity > 0)
                       .map((item) => (
                         <TableRow
                           key={item.lot_no}
@@ -221,7 +152,7 @@ export default function ShippedView() {
                             className="sticky left-0 z-10 pl-0 flex items-center justify-center"
                             style={{
                               backgroundColor:
-                                theme === "dark" ? "#131D34" : "#ffffff",
+                                theme === "dark" ? "#131D34" : "#fff",
                             }}
                           >
                             <Checkbox
@@ -229,6 +160,7 @@ export default function ShippedView() {
                               onCheckedChange={() => toggleItemSelection(item)}
                             />
                           </TableCell>
+
                           <TableCell>{item.lot_no}</TableCell>
                           <TableCell>{item.product_code}</TableCell>
                           <TableCell>{item.stock_no}</TableCell>
@@ -241,21 +173,19 @@ export default function ShippedView() {
               </div>
             )}
           </CardContent>
+
+          {/* ADD SELECTED ITEMS BUTTON */}
           <div className="p-2">
             <Button
               onClick={() => {
-                moveSelectedItems(stockedParts, setHighlightedItem);
-                // toggleItemAdded(stockedParts);
+                moveSelectedItems();
                 stockedParts
                   .filter((item) => item.selected)
-                  .forEach((item) => {
-                    // Use setTimeout to ensure toast renders after state updates
-                    setTimeout(() => {
-                      toast.success(`${t("itemAdded")}: ${item.lot_no}`, {
-                        duration: 2000,
-                      });
-                    }, 0);
-                  });
+                  .forEach((item) =>
+                    toast.success(`${t("itemAdded")}: ${item.lot_no}`, {
+                      duration: 2000,
+                    })
+                  );
               }}
               disabled={!stockedParts.some((item) => item.selected)}
               className="w-full bg-primary text-md h-[50px]"
@@ -265,114 +195,59 @@ export default function ShippedView() {
             </Button>
           </div>
         </Card>
-        {/* Table 2: Items to Ship */}
+
+        {/* ITEMS TO SHIP TABLE */}
         <Card className="mb-4">
           <CardHeader className="py-2">
             <CardTitle className="text-lg">{t("ship-title2")}</CardTitle>
           </CardHeader>
+
           <CardContent className="overflow-hidden">
             {selectedItems.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                <p>{t("no-added-items")}</p>
-              </div>
+              <p className="text-center py-4 text-muted-foreground">
+                {t("no-added-items")}
+              </p>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="whitespace-nowrap">
-                    {/* //TODO try na di mawala yung table head pag nag scroll down */}
-                    <TableHead
-                      className="py-0"
-                      style={{
-                        backgroundColor:
-                          theme === "dark" ? "#131D34" : "#ffffff",
-                      }}
-                    >
-                      {t("lotNo")}
-                    </TableHead>
-                    <TableHead
-                      style={{
-                        backgroundColor:
-                          theme === "dark" ? "#131D34" : "#ffffff",
-                      }}
-                    >
-                      {t("prodNo")}
-                    </TableHead>
-                    <TableHead
-                      style={{
-                        backgroundColor:
-                          theme === "dark" ? "#131D34" : "#ffffff",
-                      }}
-                    >
-                      {t("stockNo")}
-                    </TableHead>
-                    <TableHead
-                      style={{
-                        backgroundColor:
-                          theme === "dark" ? "#131D34" : "#ffffff",
-                      }}
-                    >
-                      {t("desc")}
-                    </TableHead>
-                    <TableHead
-                      style={{
-                        backgroundColor:
-                          theme === "dark" ? "#131D34" : "#ffffff",
-                      }}
-                    >
-                      {t("stock")}
-                    </TableHead>
-                    <TableHead
-                      style={{
-                        backgroundColor:
-                          theme === "dark" ? "#131D34" : "#ffffff",
-                      }}
-                    >
-                      {t("quantity")}
-                    </TableHead>
-                    <TableHead
-                      className="w-[80px]"
-                      style={{
-                        backgroundColor:
-                          theme === "dark" ? "#131D34" : "#ffffff",
-                      }}
-                    >
-                      {t("remove")}
-                    </TableHead>
+                  <TableRow>
+                    <TableHead>{t("lotNo")}</TableHead>
+                    <TableHead>{t("prodNo")}</TableHead>
+                    <TableHead>{t("stockNo")}</TableHead>
+                    <TableHead>{t("desc")}</TableHead>
+                    <TableHead>{t("stock")}</TableHead>
+                    <TableHead>{t("quantity")}</TableHead>
+                    <TableHead className="w-20">{t("remove")}</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="whitespace-nowrap">
+
+                <TableBody>
                   {selectedItems.map((item, index) => (
                     <TableRow key={item.lot_no}>
-                      <TableCell className="whitespace-nowrap">
-                        {item.lot_no}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {item.product_code}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {item.stock_no}
-                      </TableCell>
-                      <TableCell className="min-w-[250px] whitespace-normal text-start">
+                      <TableCell>{item.lot_no}</TableCell>
+                      <TableCell>{item.product_code}</TableCell>
+                      <TableCell>{item.stock_no}</TableCell>
+                      <TableCell className="whitespace-normal">
                         {item.description}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-center">
-                        {item.quantity}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell>{item.quantity}</TableCell>
+
+                      {/* Quantity Input */}
+                      <TableCell>
                         <Input
                           type="number"
                           min="1"
                           max={item.quantity}
                           className="w-20 p-1 border rounded-md"
-                          value={
-                            item.ship_quantity === ""
-                              ? ""
-                              : String(item.ship_quantity)
+                          value={item.ship_quantity ?? ""}
+                          onChange={(e) =>
+                            handleInputChange(e.target.value, index)
                           }
-                          onChange={(e) => handleInputChange(e, index)}
                         />
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-center">
+
+                      {/* Remove Button */}
+                      <TableCell className="text-center">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -388,7 +263,6 @@ export default function ShippedView() {
                           className="h-8 w-8 p-0"
                         >
                           <Minus className="h-4 w-4" />
-                          <span className="sr-only">{t("remove")}</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -398,11 +272,12 @@ export default function ShippedView() {
             )}
           </CardContent>
         </Card>
-        {/* Ship Button */}
+
+        {/* SHIP BUTTON */}
         <Button
           className="w-full py-6 mt-auto bg-primary mb-4 text-md h-[50px]"
           disabled={loading || selectedItems.length === 0}
-          onClick={() => shipParts(selectedItems)}
+          onClick={() => shipParts()}
         >
           {loading ? (
             <>

@@ -31,11 +31,13 @@ interface Recipient {
 interface AddRecipientFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onRecipientAdded?: () => void;
 }
 
 export function AddRecipientForm({
   open,
   onOpenChange,
+  onRecipientAdded,
 }: AddRecipientFormProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,6 +55,7 @@ export function AddRecipientForm({
 
       if (result.success && result.message) {
         toast.success(result?.message);
+        onRecipientAdded?.();
         resetForm();
         onOpenChange(false);
       } else if (result.error) {

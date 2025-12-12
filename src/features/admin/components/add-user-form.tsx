@@ -97,6 +97,7 @@ export function AddUserForm({
       setTimeout(() => {
         toast.success(`User added successfully: ${result}`);
       }, 0);
+      onUserAdded?.();
       resetForm();
       onOpenChange(false);
     } catch (error) {

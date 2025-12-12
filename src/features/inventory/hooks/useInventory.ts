@@ -1,66 +1,54 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { useEffect, useState } from "react";
 import { getInventory } from "../services/getInventory";
 import { getWarehouse } from "../services/getWarehouse";
-
-export type Inventory = {
-    lot_no: string;
-    product_code: string;
-    stock_no: string;
-    description: string;
-    warehouse: string;
-    created_at: string;
-    quantity: number;
-} | null;
+import { InventoryRow, WarehouseRow } from "@/types/inventory";
 
 export function useInventory() {
-    const [inventory, setInventory] = useState<Inventory[]>([]);
-    const [inventoryLoading, setInventoryLoading] = useState(false)
-    const [inventoryError, setInventoryError] = useState(false)
-    const [warehouse, setWarehouse] = useState<any>(null);
-    const [warehouseLoading, setWarehouseLoading] = useState(true);
-    const [warehouseError, setWarehouseError] = useState<string | null>(null);
+  const [inventory, setInventory] = useState<InventoryRow[]>([]);
+  const [inventoryLoading, setInventoryLoading] = useState<boolean>(false);
+  const [inventoryError, setInventoryError] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchInventory();
-        fetchWarehouse();
-    }, []);
+  const [warehouse, setWarehouse] = useState<WarehouseRow[]>([]);
+  const [warehouseLoading, setWarehouseLoading] = useState<boolean>(false);
+  const [warehouseError, setWarehouseError] = useState<string | null>(null);
 
-    const fetchInventory = async () => {
-        setInventoryLoading(true);
-        try {
-            const response = await getInventory();
-            setInventory(response);
-        } catch (error: any) {
-            console.error("Error fetching metrics:", error);
-            setInventoryError(error.message || "Failed to fetch overview data");
-        } finally {
-            setInventoryLoading(false);
-        }
-    };
+  useEffect(() => {
+    fetchInventory();
+    fetchWarehouse();
+  }, []);
 
-    const fetchWarehouse = async () => {
-        setWarehouseLoading(true);
-        try {
-            const response = await getWarehouse();
-            console.log("Fetched warehouse:", response);
-            setWarehouse(response);
-        } catch (error: any) {
-            console.error("Error fetching metrics:", error);
-            setWarehouseError(error.message || "Failed to fetch shipped data");
-        } finally {
-            setWarehouseLoading(false);
-        }
-    };
+  async function fetchInventory() {
+    setInventoryLoading(true);
+    try {
+      const data = await getInventory();
+      setInventory(data);
+    } catch (error: any) {
+      setInventoryError(error.message);
+    } finally {
+      setInventoryLoading(false);
+    }
+  }
 
-    return {
-        inventory,
-        inventoryLoading,
-        inventoryError,
-        refetchInventory: fetchInventory,
-        warehouse,
-        warehouseLoading,
-        warehouseError,
-    };
+  async function fetchWarehouse() {
+    setWarehouseLoading(true);
+    try {
+      const data = await getWarehouse();
+      setWarehouse(data);
+    } catch (error: any) {
+      setWarehouseError(error.message);
+    } finally {
+      setWarehouseLoading(false);
+    }
+  }
+
+  return {
+    inventory,
+    inventoryLoading,
+    inventoryError,
+    refetchInventory: fetchInventory,
+
+    warehouse,
+    warehouseLoading,
+    warehouseError,
+  };
 }

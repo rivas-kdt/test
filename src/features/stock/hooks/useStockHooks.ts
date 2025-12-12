@@ -2,66 +2,110 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { stockParts } from "../services/StockParts";
+import { ScannedItem, StockItemPayload } from "@/types/stock";
 import { v4 as uuidv4 } from "uuid";
 import { useWarehouse } from "@/context/warehouseContext";
+import jsQR from "jsqr";
 
 export function useStockActions() {
-  const [scannedItems, setScannedItems] = useState<any[]>([]);
+  const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
   const [receipt, setReceipt] = useState<string | null>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { warehouseId } = useWarehouse();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileQRInputRef = useRef<HTMLInputElement>(null);
+  const { warehouseId } = useWarehouse();
 
+  const handleUploadQRImage = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+
+      await new Promise((resolve) => (img.onload = resolve));
+
+      // Draw onto canvas so jsQR can read it
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas context not available");
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+
+      if (!qrCode) {
+        toast.error("Cannot detect QR code in the uploaded image.");
+        return;
+      }
+
+      toast.success("QR image decoded!");
+      handleScan(qrCode.data); // <-- same flow as live camera scan
+    } catch (err) {
+      console.error("QR image decode error:", err);
+      toast.error("Failed to read QR from image.");
+    } finally {
+      if (fileQRInputRef.current) fileQRInputRef.current.value = "";
+    }
+  };
+
+  // -----------------------------
+  // QR Scanner Handler
+  // -----------------------------
   const handleScan = (data: string) => {
     if (!data) return;
 
     try {
       const values = data.split(",");
-      console.log(values);
       if (values.length < 6) {
         toast.error("QR code format is incorrect.");
         return;
       }
 
-      const productCode = values[1];
-      const stockNo = values[3];
-      const description = values[4];
-      const lotNo = values[5];
-      const quantity = Number(values[6]);
-
-      const newItem = {
-        id: Date.now().toString(),
-        productCode,
-        stockNo,
-        lotNo,
-        description,
-        quantity,
+      const item: ScannedItem = {
+        id: uuidv4(),
+        productCode: values[1],
+        stockNo: values[3],
+        description: values[4],
+        lotNo: values[5],
+        quantity: Number(values[6]) || 1,
       };
 
-      setScannedItems((prev) => [...prev, newItem]);
-
-      toast.success(`Added item: ${lotNo}`);
+      setScannedItems((prev) => [...prev, item]);
+      toast.success(`Added item: ${item.lotNo}`);
     } catch (error) {
-      console.error("QR error:", error);
-      toast.error("QR error");
+      toast.error("QR parsing error");
     }
 
     setScanning(false);
   };
 
-  const handleQuantityChange = (id: string, newQ: string) => {
-    const q = parseInt(newQ);
+  // -----------------------------
+  // Quantity Change
+  // -----------------------------
+  const handleQuantityChange = (id: string, newValue: string) => {
+    const q = Number(newValue);
 
     setScannedItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity: isNaN(q) ? 0 : q } : i))
+      prev.map((i) => (i.id === id ? { ...i, quantity: q || 0 } : i))
     );
   };
 
+  // -----------------------------
+  // Receipt Upload (Image → Base64)
+  // -----------------------------
   const handleUploadReceiptFile = (file: File) => {
     if (!file) return;
+
     setReceiptFile(file);
 
     const reader = new FileReader();
@@ -78,62 +122,43 @@ export function useStockActions() {
     if (file) handleUploadReceiptFile(file);
   };
 
+  // -----------------------------
+  // Stock Items Logic
+  // -----------------------------
   const handleStockItems = async () => {
-    console.log("Stocking items...", scannedItems, receiptFile);
-    if (scannedItems.length === 0) {
-      console.log("No items scanned");
-      toast.error("Please scan at least one item");
-      return;
-    }
-    if (!receiptFile) {
-      console.log("No receipt file uploaded");
-      toast.error("Please upload a receipt");
+    if (!warehouseId) {
+      toast.error("Warehouse not selected");
       return;
     }
 
-    const hasInvalidQty = scannedItems.some(
-      (i) => !i.quantity || i.quantity < 1 || isNaN(i.quantity)
-    );
-    if (hasInvalidQty) {
-      console.log("Invalid quantity detected in scanned items");
-      toast.error("Invalid quantity detected.");
+    if (scannedItems.length === 0) {
+      toast.error("Scan at least one item");
+      return;
+    }
+
+    if (!receiptFile) {
+      toast.error("Upload a receipt");
+      return;
+    }
+
+    if (scannedItems.some((i) => i.quantity < 1)) {
+      toast.error("Invalid quantity detected");
       return;
     }
 
     setLoading(true);
 
     try {
-      // const warehouseId = sessionStorage.getItem("selectedWarehouseId");
+      // Upload receipt image
+      const fileExt = receiptFile.name.split(".").pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
 
-      if (!warehouseId) {
-        console.log("Warehouse ID not found");
-        toast.error("Warehouse not selected");
-        return;
-      }
-
-      // const firstLotNo = scannedItems[0]?.lotNo ?? "unknown-lot";
-      // const sanitizedLotNo = firstLotNo.replace(/[^a-zA-Z0-9_-]/g, ""); // clean filename
-
-      // const today = new Date();
-      // const yyyy = today.getFullYear();
-      // const mm = String(today.getMonth() + 1).padStart(2, "0");
-      // const dd = String(today.getDate()).padStart(2, "0");
-      // const formattedDate = `${yyyy}${mm}${dd}`;
-
-      const fileExtension = receiptFile.name.split(".").pop(); // get original extension
-      //
-      const id = uuidv4();
-      const fileName = `${id}.${fileExtension}`;
-
-      // const fileName = `${sanitizedLotNo}-${formattedDate}.${fileExtension}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadErr } = await supabase.storage
         .from("xmon-storage")
         .upload(`receipts/${fileName}`, receiptFile);
 
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        toast.error("Failed to upload receipt.");
-        setLoading(false);
+      if (uploadErr) {
+        toast.error("Receipt upload failed");
         return;
       }
 
@@ -141,40 +166,35 @@ export function useStockActions() {
         .from("xmon-storage")
         .getPublicUrl(`receipts/${fileName}`);
 
-      if (!urlData?.publicUrl) {
-        toast.error("Failed to get receipt URL.");
-        setLoading(false);
-        return;
-      }
-
       const receiptUrl = urlData.publicUrl;
-      setReceipt(receiptUrl);
 
+      // Stock each item
       for (const item of scannedItems) {
-        const res = await stockParts(
-          item.lotNo,
-          item.stockNo,
-          item.productCode,
-          item.description,
-          item.quantity,
+        const payload: StockItemPayload = {
+          lotNo: item.lotNo,
+          stockNo: item.stockNo,
+          productCode: item.productCode,
+          description: item.description,
+          quantity: item.quantity,
           warehouseId,
-          receiptUrl
-        );
-        console.log("StockParts response:", res);
-        if (res.error) {
-          toast.error(res.error);
-          continue;
+          receiptUrl,
+        };
+
+        const result = await stockParts(payload);
+
+        if (result.error) {
+          toast.error(result.error);
         }
       }
 
       toast.success("Items stocked successfully");
 
+      // reset
       setScannedItems([]);
       setReceipt(null);
       setReceiptFile(null);
       sessionStorage.removeItem("receiptImage");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
       toast.error("Error stocking items");
     } finally {
       setLoading(false);
@@ -183,20 +203,17 @@ export function useStockActions() {
 
   return {
     scannedItems,
-    setScannedItems,
-
     receipt,
     receiptFile,
-    fileInputRef,
-
     scanning,
     loading,
-
+    fileInputRef,
+    fileQRInputRef,
     setScanning,
     handleScan,
     handleQuantityChange,
     handleUploadReceipt,
-    handleUploadReceiptFile,
     handleStockItems,
+    handleUploadQRImage,
   };
 }

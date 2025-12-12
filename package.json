@@ -28,6 +28,7 @@
     "clsx": "^2.1.1",
     "html5-qrcode": "^2.3.8",
     "jose": "^6.0.12",
+    "jsqr": "^1.4.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.553.0",
     "next": "15.5.6",

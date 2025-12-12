@@ -10,73 +10,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useIsMobile } from "@/hooks/useMobile";
 import { ArrowLeft, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-type Transaction = {
-  id: string;
-  lot_no: string;
-  quantity: number;
-  warehouse: string;
-  status: "Shipped" | "Stocked" | string;
-  created_at: string;
-};
-
-type Warehouse = {
-  id: string;
-  name: string;
-  location?: string;
-  warehouse?: string;
-};
+import { useTransactionHooks } from "../hooks/useTransactions";
+import { useWarehouse } from "@/context/warehouseContext";
+import { Transaction } from "@/types/transaction";
 
 const TransactionMobile = () => {
   const router = useRouter();
-  const isMobile = useIsMobile();
-  const [loading, setLoading] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(
-    null
-  );
+  const t = useTranslations("transaction-page");
+  const { warehouseId } = useWarehouse();
+  const { transactions, loading } = useTransactionHooks();
+
   const [selectedTab, setSelectedTab] = useState<"Shipped" | "Stocked">(
     "Shipped"
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [isInputVisible, setIsInputVisible] = useState(false);
-  const t = useTranslations("transaction-page");
 
-  const handleSearchClick = () => setIsInputVisible((prev) => !prev);
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-  const filteredTransactions = transactions
-    .filter((item) => item.status.toLowerCase() === selectedTab.toLowerCase())
-    .filter((item) =>
-      item.lot_no.toLowerCase().includes(searchQuery.toLowerCase())
+  const filtered = transactions
+    .filter((tx) => tx.status.toLowerCase() === selectedTab.toLowerCase())
+    .filter((tx) => tx.lot_no.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((tx) =>
+      warehouseId ? tx.warehouse_id.includes(warehouseId) : true
     );
 
   return (
-    <main className="fixed flex flex-col w-screen p-4 pt-20 overflow-y-auto">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => router.back()}
-        className="active:bg-primary transition"
-      >
+    <main className="fixed flex flex-col w-screen p-4 pt-20 overflow-y-auto bg-linear-to-b from-primary/10 to-background">
+      <Button variant="ghost" size="icon" onClick={() => router.back()}>
         <ArrowLeft className="h-6 w-6" />
       </Button>
 
-      {/* Header */}
-      <div className="mb-2">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold ml-2">{t("title")}</h1>
-        </div>
-      </div>
+      <h1 className="text-xl font-bold ml-2">{t("title")}</h1>
 
-      {/* Tabs and Search */}
+      {/* Tabs */}
       <div className="flex justify-between items-center mt-2 mb-4">
         <div className="flex space-x-2">
           <Button
@@ -92,79 +61,65 @@ const TransactionMobile = () => {
             {t("stock-tab")}
           </Button>
         </div>
-        <Button onClick={handleSearchClick} className="rounded-full">
-          <Search className="h-[1.2rem] w-[1.2rem]" />
+
+        <Button
+          onClick={() => setIsInputVisible((p) => !p)}
+          className="rounded-full"
+        >
+          <Search className="h-5 w-5" />
         </Button>
       </div>
 
-      {/* Search Input */}
       {isInputVisible && (
         <Input
           type="text"
           value={searchQuery}
-          onChange={handleInputChange}
-          className="mb-4 mt-2 p-2 border border-gray-300 rounded-lg shadow-sm w-full"
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t("searchby")}
+          className="mb-4"
         />
       )}
 
-      {/* Transactions List */}
       <div className="px-2 overflow-y-auto max-h-[75vh]">
         {loading ? (
-          <p className="text-center text-sm text-muted-foreground">
-            {t("loading-page")}
-          </p>
-        ) : !selectedWarehouse ? (
-          <p className="text-center text-sm text-muted-foreground">
-            {t("select-wh")}.
-          </p>
+          <p className="text-center">{t("loading-page")}</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-center">{t("no-transactions")}</p>
         ) : (
-          <>
-            {filteredTransactions.length > 0 ? (
-              filteredTransactions.map((item) => (
-                <div
-                  key={item.id}
-                  className="border border-primary rounded-lg p-2 my-4 bg-white dark:bg-gray-800 shadow-sm"
-                >
-                  <div className="flex justify-between mb-2">
-                    <span className="font-medium text-primary">
-                      {t("warehouse")}: {item.warehouse || t("no-warehouse")}
-                    </span>
-                    <span>
-                      {t("date")}:{" "}
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <Table style={{ maxHeight: "100%" }}>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("lotNo")}</TableHead>
-                        <TableHead>{t("quantity")}</TableHead>
-                        <TableHead>{t("status")}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>{item.lot_no}</TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell>
-                          {item.status.toLowerCase() === "shipped"
-                            ? "Shipped"
-                            : item.status.toLowerCase() === "stocked"
-                            ? "Stocked"
-                            : item.status}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground mt-4">
-                {t("no-transactions")}
-              </p>
-            )}
-          </>
+          filtered.map((item: Transaction) => (
+            <div
+              key={item.id}
+              className="border border-primary rounded-lg p-2 my-4 bg-white dark:bg-gray-800 shadow-sm"
+            >
+              <div className="flex justify-between mb-2">
+                <span className="font-medium text-primary">
+                  {item.warehouse}
+                </span>
+                <span>
+                  {t("date")}:{" "}
+                  {new Date(item.created_at ?? item.date!).toLocaleDateString()}
+                </span>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("lotNo")}</TableHead>
+                    <TableHead>{t("quantity")}</TableHead>
+                    <TableHead>{t("status")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  <TableRow>
+                    <TableCell>{item.lot_no}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell>{item.status}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          ))
         )}
       </div>
     </main>
