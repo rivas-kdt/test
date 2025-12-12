@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,16 +19,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { useTranslations } from "next-intl";
-import { editUser } from "@/features/admin/services/editUser";
 import toast from "react-hot-toast";
+
+import { editUser } from "@/features/admin/services/editUser";
 import { User } from "@/types/admin";
+import { Warehouse } from "@/types/warehouse";
+import { getWarehouse } from "@/features/inventory/services/getWarehouse";
 
 interface EditUserDialogProps {
   user: User | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  onUserEdit: () => void;
+}
+
+interface EditUserForm {
+  username: string;
+  email: string;
+  role: "admin" | "worker";
+  warehouse_id: string;
 }
 
 export function EditUserDialog({
@@ -36,30 +48,61 @@ export function EditUserDialog({
   open,
   onOpenChange,
   onSuccess,
+  onUserEdit,
 }: EditUserDialogProps) {
-  const [formData, setFormData] = useState({
+  const t = useTranslations("editUser");
+
+  const [formData, setFormData] = useState<EditUserForm>({
     username: "",
     email: "",
     role: "worker",
+    warehouse_id: "",
   });
 
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(false);
-  const t = useTranslations("editUser");
 
+  // ================================
+  // Load user data into form
+  // ================================
   useEffect(() => {
-    if (user) {
-      setFormData({
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      });
-    }
+    if (!user) return;
+
+    setFormData({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      warehouse_id: user.warehouse_id ?? "",
+    });
   }, [user]);
 
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  // ================================
+  // Load warehouse list
+  // ================================
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await getWarehouse();
+        setWarehouses(list);
+      } catch {
+        toast.error("Failed to load warehouses");
+      }
+    })();
+  }, []);
 
+  // ================================
+  // Field update handler
+  // ================================
+  const handleChange = useCallback(
+    (field: keyof EditUserForm, value: string) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  // ================================
+  // Submit handler
+  // ================================
   const handleSubmit = async () => {
     if (!user) return;
     setLoading(true);
@@ -67,14 +110,16 @@ export function EditUserDialog({
     try {
       const result = await editUser(user.id, formData);
 
-      if (result.success) {
-        toast.success(t("success"));
-        onSuccess?.();
-        onOpenChange(false);
-      } else {
+      if (!result.success) {
         toast.error(result.message || t("error"));
+        return;
       }
-    } catch (err) {
+
+      toast.success(t("success"));
+      onSuccess?.();
+      onUserEdit();
+      onOpenChange(false);
+    } catch {
       toast.error(t("error"));
     } finally {
       setLoading(false);
@@ -83,6 +128,9 @@ export function EditUserDialog({
 
   if (!user) return null;
 
+  // ================================
+  // UI
+  // ================================
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -102,14 +150,13 @@ export function EditUserDialog({
             />
           </div>
 
-          {/* Email */}
+          {/* Email (locked) */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label>{t("email")}</Label>
             <Input
-              type="email"
               value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              className="col-span-3"
+              disabled
+              className="col-span-3 bg-muted cursor-not-allowed"
             />
           </div>
 
@@ -118,7 +165,9 @@ export function EditUserDialog({
             <Label>{t("role")}</Label>
             <Select
               value={formData.role}
-              onValueChange={(v) => handleChange("role", v)}
+              onValueChange={(v) =>
+                handleChange("role", v as EditUserForm["role"])
+              }
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue />
@@ -129,11 +178,35 @@ export function EditUserDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Warehouse */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label>{t("warehouse")}</Label>
+
+            <Select
+              value={formData.warehouse_id}
+              onValueChange={(v) => handleChange("warehouse_id", v)}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder={t("selectWarehouse")} />
+              </SelectTrigger>
+              <SelectContent>
+                {warehouses.length === 0 && (
+                  <SelectItem value="">{t("noWarehouse")}</SelectItem>
+                )}
+                {warehouses.map((w) => (
+                  <SelectItem key={w.id} value={String(w.id)}>
+                    {w.warehouse}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? t("saving") : t("button")}
+          <Button disabled={loading} onClick={handleSubmit}>
+            {loading ? t("loadingState") : t("button")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -6,6 +6,7 @@ export interface User {
   warehouse: string | null;
   location: string | null;
   created_at: string;
+  warehouse_id: string | null;
 }
 
 export interface Recipient {

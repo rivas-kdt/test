@@ -219,7 +219,7 @@
     "title": "メール履歴",
     "noHistory": "履歴が見つかりません",
     "noTransaction": "取引が見つかりません",
-    "lotNo`": "ロット番号",
+    "lotNo": "ロット番号",
     "prodCode": "製品コード",
     "stockNo": "在庫番号",
     "desc": "説明",
@@ -302,7 +302,9 @@
     "worker": "担当者",
     "button": "変更を保存",
     "addingState": "保存中...",
-    "loadingState": "読み込み中..."
+    "loadingState": "読み込み中...",
+    "warehouse": "倉庫",
+    "selectWarehouse": "倉庫を選択してください"
   },
   "editWarehouse": {
     "header": "倉庫を編集",

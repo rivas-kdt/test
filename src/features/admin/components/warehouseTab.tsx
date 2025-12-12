@@ -1,3 +1,4 @@
+// src/features/admin/components/warehouseTab.tsx
 "use client";
 import React, { useEffect } from "react";
 import {
@@ -123,8 +124,7 @@ export function WarehouseTab<TData, TValue>({
             <CardTitle className="text-primary">{t("warehouseMgt")}</CardTitle>
             <Button
               onClick={() => setAddWarehouseOpen(true)}
-              variant="outline"
-              className="flex items-center gap-2 bg-primary hover:bg-primary/50 text-primary-foreground"
+              className="flex items-center gap-2 hover:cursor-pointer"
             >
               <Building className="h-4 w-4" />
               {t("addWarehouse")}

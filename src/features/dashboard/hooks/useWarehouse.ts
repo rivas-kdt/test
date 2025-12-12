@@ -29,7 +29,6 @@ export function useWarehouse() {
     setInventoryLoading(true);
     try {
       const response = await getWarehouseInvnentory();
-      console.log("Fetched warehouse inventory:", response);
       setWarehouseInventory(response);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
@@ -43,7 +42,6 @@ export function useWarehouse() {
     setWarehouseLoading(true);
     try {
       const response = await getWarehouse();
-      console.log("Fetched warehouse:", response);
       setWarehouse(response);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);

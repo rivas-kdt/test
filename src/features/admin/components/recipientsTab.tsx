@@ -99,8 +99,7 @@ export function RecipientsTab<TData, TValue>({
             <CardTitle className="text-primary">{t("recipientMgt")}</CardTitle>
             <Button
               onClick={() => setAddRecipientOpen(true)}
-              variant="outline"
-              className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/50"
+              className="flex items-center gap-2 hover:cursor-pointer"
             >
               <Mail className="h-4 w-4" />
               {t("addRec")}

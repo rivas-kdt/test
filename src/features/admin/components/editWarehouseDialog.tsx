@@ -22,6 +22,7 @@ interface EditWarehouseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  onWarehouseEdit: () => void;
 }
 
 export function EditWarehouseDialog({
@@ -29,6 +30,7 @@ export function EditWarehouseDialog({
   open,
   onOpenChange,
   onSuccess,
+  onWarehouseEdit,
 }: EditWarehouseDialogProps) {
   const [formData, setFormData] = useState({ warehouse: "", location: "" });
   const [loading, setLoading] = useState(false);
@@ -53,6 +55,7 @@ export function EditWarehouseDialog({
       if (result.success) {
         toast.success(t("success"));
         onSuccess?.();
+        onWarehouseEdit();
         onOpenChange(false);
       } else {
         toast.error(result.message || t("error"));
@@ -102,7 +105,7 @@ export function EditWarehouseDialog({
 
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? t("saving") : t("button")}
+            {loading ? t("loadingState") : t("button")}
           </Button>
         </DialogFooter>
       </DialogContent>

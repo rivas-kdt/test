@@ -296,11 +296,12 @@
     "username": "Username",
     "email": "Email",
     "role": "Role",
-    "button": "Add User",
     "admin": "Admin",
     "worker": "Worker",
-    "addingState": "Save changes",
-    "loadingState": "Saving..."
+    "button": "Save changes",
+    "loadingState": "Saving...",
+    "warehouse": "Warehouse",
+    "selectWarehouse": "Select Warehouse"
   },
   "editWarehouse": {
     "header": "Edit Warehouse",

@@ -216,12 +216,13 @@ export default function AdminPage() {
           open={editUserOpen}
           onOpenChange={setEditUserOpen}
           user={selectedUser}
-          locations={[]}
+          onUserEdit={refetchuser}
         />
         <EditWarehouseDialog
           open={editWarehouseOpen}
           onOpenChange={setEditWarehouseOpen}
           warehouse={selectedWarehouse}
+          onWarehouseEdit={refetchwarehouse}
         />
       </main>
     </ProtectedRoute>

@@ -24,8 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ProtectedRoute } from "@/features/auth/components/protected-route";
-import { useAuth } from "@/features/auth/hooks/auth-context";
 import { useTransaction } from "@/features/dashboard/hooks/useDashboardHooks";
 import { useShip } from "@/features/dashboard/hooks/useShip";
 import { useStock } from "@/features/dashboard/hooks/useStock";
@@ -47,7 +45,6 @@ import {
   LabelList,
   Line,
   LineChart,
-  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
@@ -154,8 +151,8 @@ const DashboardContent = () => {
                         </>
                       ) : (
                         <>
-                          <TrendingDown className="text-destructive h-5 w-5" />
-                          <p className="text-md text-destructive">
+                          <TrendingUp className="text-green-500 h-5 w-5" />
+                          <p className="text-md text-green-500">
                             {`${Math.abs(totalPctChange)}%`}
                           </p>
                         </>
@@ -367,53 +364,51 @@ const DashboardContent = () => {
                 config={chartConfig}
                 className="h-[calc(40vh-80px)] w-full"
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    accessibilityLayer
-                    data={monthly ?? []}
-                    margin={{ right: 12, left: 14, bottom: 20 }}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="month_name"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      tickFormatter={(value) => {
-                        const translated = t(`months.${value}`, {
-                          fallback: value,
-                        });
-                        return translated.slice(0, 3);
-                      }}
-                      domain={[0, maxY]}
-                    />
-                    <YAxis
-                      type="number"
-                      tickLine={false}
-                      axisLine={false}
-                      domain={[0, maxY]}
-                      hide
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent />}
-                    />
-                    <Line
-                      dataKey="stocked"
-                      type="monotone"
-                      stroke="var(--color-chart-1)"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line
-                      dataKey="shipped"
-                      type="monotone"
-                      stroke="var(--color-chart-2)"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <LineChart
+                  accessibilityLayer
+                  data={monthly ?? []}
+                  margin={{ right: 12, left: 14, bottom: 20 }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="month_name"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => {
+                      const translated = t(`months.${value}`, {
+                        fallback: value,
+                      });
+                      return translated.slice(0, 3);
+                    }}
+                    domain={[0, maxY]}
+                  />
+                  <YAxis
+                    type="number"
+                    tickLine={false}
+                    axisLine={false}
+                    domain={[0, maxY]}
+                    hide
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent />}
+                  />
+                  <Line
+                    dataKey="stocked"
+                    type="monotone"
+                    stroke="var(--color-chart-1)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    dataKey="shipped"
+                    type="monotone"
+                    stroke="var(--color-chart-2)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
               </ChartContainer>
             )}
           </CardContent>

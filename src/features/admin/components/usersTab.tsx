@@ -1,3 +1,4 @@
+// src/features/admin/components/usersTab.tsx
 "use client";
 import React, { useEffect } from "react";
 import {
@@ -118,8 +119,7 @@ export function UserTab<TData, TValue>({
             <CardTitle className="text-primary">{t("userMgt")}</CardTitle>
             <Button
               onClick={() => setAddUserOpen(true)}
-              variant="outline"
-              className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/50"
+              className="flex items-center gap-2 hover:cursor-pointer"
             >
               <UserPlus className="h-4 w-4" />
               {t("addUser")}

@@ -13,6 +13,7 @@ export async function getUsers(): Promise<User[]> {
         u.role,
         u.created_at,
         w.warehouse,
+        w.id as warehouse_id,
         w.location
       FROM users u
       LEFT JOIN worker_location wl ON u.id = wl.user_id

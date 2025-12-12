@@ -38,7 +38,7 @@ const TransactionMobile = () => {
     );
 
   return (
-    <main className="fixed flex flex-col w-screen p-4 pt-20 overflow-y-auto bg-linear-to-b from-primary/10 to-background">
+    <main className="fixed flex flex-col w-screen p-4 pt-2 overflow-y-auto">
       <Button variant="ghost" size="icon" onClick={() => router.back()}>
         <ArrowLeft className="h-6 w-6" />
       </Button>
@@ -89,7 +89,7 @@ const TransactionMobile = () => {
           filtered.map((item: Transaction) => (
             <div
               key={item.id}
-              className="border border-primary rounded-lg p-2 my-4 bg-white dark:bg-gray-800 shadow-sm"
+              className="border border-primary rounded-lg p-2 my-4 bg-card shadow-sm"
             >
               <div className="flex justify-between mb-2">
                 <span className="font-medium text-primary">
