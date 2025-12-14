@@ -81,7 +81,7 @@ export default function Header() {
                 </Button>
               </SheetTrigger>
 
-              <SheetContent side="right" className="w-64">
+              <SheetContent side="right" className=" px-4">
                 <div className="flex flex-col h-full">
                   {/* Navigation */}
                   <nav className="flex flex-col gap-4 py-4">

@@ -75,7 +75,8 @@
     "transaction": "入出庫履歴",
     "email-history": "メール履歴",
     "logout": "ログアウト",
-    "home": "ホーム"
+    "home": "ホーム",
+    "theme": "テーマ"
   },
   "Table": {
     "lotNo": "ロット番号",

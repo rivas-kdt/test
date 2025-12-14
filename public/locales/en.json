@@ -73,7 +73,8 @@
     "transaction": "Transaction",
     "email-history": "Email History",
     "logout": "Logout",
-    "home": "Home"
+    "home": "Home",
+    "theme": "Theme"
   },
   "Table": {
     "lotNo": "Lot No.",
