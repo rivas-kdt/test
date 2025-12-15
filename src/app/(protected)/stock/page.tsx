@@ -81,7 +81,7 @@ export default function StockView() {
             className="bg-secondary w-full h-[50px]"
             onClick={() => fileQRInputRef.current?.click()}
           >
-            <img src="./qr-file.svg" className="w-4 h-4 mr-1.5" />
+            {/* <img src="./qr-file.svg" className="w-4 h-4 mr-1.5" /> */}
             {t("uploadqr")}
           </Button>
 
