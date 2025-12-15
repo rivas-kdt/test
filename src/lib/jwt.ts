@@ -1,41 +1,30 @@
 "use server";
 
-import { User } from "@/features/auth/hooks/auth-context";
 import { SignJWT } from "jose";
 import { jwtDecode } from "jwt-decode";
+import { AuthUser } from "@/types/auth";
 
-interface JwtPayload {
-  exp: number;
+export interface JwtPayload {
   iat: number;
-  user: User;
+  exp: number;
+  user: AuthUser;
 }
 
-const secretKey = process.env.JWT_SECRET_KEY;
-const key = new TextEncoder().encode(secretKey);
+const key = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
-export async function encrypt(payload: any) {
-  try {
-    return await new SignJWT(payload)
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("3d")
-      .sign(key);
-  } catch (error) {
-    console.error("Error signing JWT:", error);
-  }
+export async function encrypt(payload: any): Promise<string> {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("3d")
+    .sign(key);
 }
 
-export async function decrypt(
-  session: string | undefined = ""
-): Promise<JwtPayload | null> {
+export async function decrypt(token: string): Promise<JwtPayload | null> {
   try {
-    if (!session) {
-      throw new Error("Session is undefined or empty");
-    }
-    const payload = jwtDecode<JwtPayload>(session);
-    return payload;
-  } catch (error) {
-    console.error("Error decoding JWT:", error);
+    return jwtDecode<JwtPayload>(token);
+  } catch (e) {
+    console.error("JWT decode error:", e);
     return null;
   }
 }

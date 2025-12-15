@@ -1,18 +1,18 @@
 "use server";
+
 import { cookies } from "next/headers";
 
-export async function create(data: string) {
-  const cookieStore = await cookies();
-  cookieStore.set("jwt", data, { secure: true });
+export async function createSession(token: string) {
+  const cookie = await cookies();
+  cookie.set("jwt", token, { secure: true, httpOnly: false });
 }
 
-export async function get(data: string) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(data);
-  return token?.value;
+export async function readSession() {
+  const cookie = await cookies();
+  return cookie.get("jwt")?.value || null;
 }
 
-export async function deleteSession() {
-  const cookieStore = await cookies();
-  cookieStore.delete("jwt");
+export async function clearSession() {
+  const cookie = await cookies();
+  cookie.delete("jwt");
 }

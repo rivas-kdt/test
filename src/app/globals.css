@@ -131,7 +131,7 @@
     @apply bg-background text-foreground;
   }
   main {
-    @apply bg-linear-to-t from-gray-from to-gray-to min-h-[calc(100vh-80px)];
+    @apply min-h-[calc(100vh-80px)];
   }
 }
 

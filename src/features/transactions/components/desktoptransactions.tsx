@@ -1,149 +1,102 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import { ArrowUpDown, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 import { TransactionTable } from "./ui/transactionstab";
-import { Imagedialog } from "./ui/imgDialog";
-import { fetchParts, getTransactions } from "../services/getTransactions";
+import Loader from "@/components/ui/loader";
+import { Transaction } from "@/types/transaction";
 import { useTransactionHooks } from "../hooks/useTransactions";
-
-export type Transaction = {
-  lot_no: string;
-  stock_no: string;
-  description: string;
-  quantity: number;
-  warehouse: string;
-  status: string;
-  date: string;
-  imgUrl: string;
-} | null;
+import { ImagePreviewDialog } from "./ui/image-preview-dialog";
 
 const TransactionDesktop = () => {
-  // const [data, setData] = useState<Transaction[]>([]);
-  // const [loading, setLoading] = useState<boolean>(false);
-  const [imgOpen, setImgOpen] = useState(false);
-  const [selectedImgUrl, setSelectedImgUrl] = useState<string>();
-  const { transactions, loading, error } = useTransactionHooks();
+  const [imgPreview, setImgPreview] = useState<string | null>(null);
+  const { transactions, loading } = useTransactionHooks();
   const t = useTranslations("Table");
 
-  //TODO create useTransactionHooks to fetch data
+  // ==========================
+  // Column Definitions
+  // ==========================
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
+  const columns: ColumnDef<Transaction>[] = [
+    { accessorKey: "lot_no", header: t("lotNo") },
+    { accessorKey: "stock_no", header: t("stockNo") },
+    { accessorKey: "description", header: t("description") },
+    { accessorKey: "warehouse", header: t("warehouse") },
 
-  // const fetchData = async () => {
-  //   setLoading(true);
-  //   try {
-  //     // const data2 = await fetchParts();
-  //     const data3 = await getTransactions();
-  //     console.log("fetched data:", data3);
-  //     setData(data3);
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //     setLoading(false);
-  //   }
-  // };
-
-  console.log("data:", transactions);
-  const InventoryColumns: ColumnDef<Transaction>[] = [
-    {
-      accessorKey: "lot_no",
-      header: t("lotNo"),
-    },
-    {
-      accessorKey: "stock_no",
-      header: t("stockNo"),
-    },
-    {
-      accessorKey: "description",
-      header: t("description"),
-    },
-    {
-      accessorKey: "warehouse",
-      header: t("warehouse"),
-    },
     {
       accessorKey: "quantity",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            {t("quantity")}
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting()}>
+          {t("quantity")}
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
     },
+
     {
       accessorKey: "status",
       header: t("status"),
       cell: ({ row }) => {
-        const part = row.original;
-        const status = (part && part.status) || "null";
-        return <p>{`${status[0].toUpperCase()}${status?.slice(1)}`}</p>;
-      },
-    },
-    {
-      accessorKey: "date",
-      header: ({ column }) => {
+        const status = row.original.status;
         return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            {t("date")}
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
+          <p>
+            {status ? status.charAt(0).toUpperCase() + status.slice(1) : "-"}
+          </p>
         );
       },
+    },
+
+    {
+      accessorKey: "created_at",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting()}>
+          {t("date")}
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => {
-        const parts = row.original;
-        const date2 =
-          parts && parts.date ? new Date(parts.date).toLocaleDateString() : "-";
-        return <p>{date2}</p>;
+        const d = row.original.created_at;
+        return <p>{d ? new Date(d).toLocaleDateString() : "-"}</p>;
       },
     },
+
     {
       accessorKey: "imgUrl",
       header: t("image"),
       cell: ({ row }) => {
-        const parts = row.original;
-        if (parts?.imgUrl === null) {
-          return <></>;
-        }
+        const img = row.original.imgUrl;
+        if (!img) return null;
+
         return (
           <Button
-            onClick={() => {
-              console.log(parts?.imgUrl);
-              setSelectedImgUrl(parts?.imgUrl);
-              setImgOpen(true);
-            }}
+            size="icon"
+            variant="outline"
+            onClick={() => setImgPreview(img)}
           >
-            <EyeIcon />
+            <EyeIcon className="h-5 w-5" />
           </Button>
         );
       },
     },
   ];
 
+  if (loading) return <Loader />;
+
   return (
-    <main className="p-4 flex flex-col bg-linear-to-b from-primary/10 to-background">
-      <div className="  h-full w-full flex items-center">
-        <TransactionTable
-          columns={InventoryColumns}
-          data={transactions}
-          loading={loading}
-        />
-      </div>
-      <Imagedialog
-        open={imgOpen}
-        onOpenChange={setImgOpen}
-        img={selectedImgUrl}
+    <main className="p-4 flex flex-col">
+      <TransactionTable
+        columns={columns}
+        data={transactions}
+        loading={loading}
+      />
+
+      <ImagePreviewDialog
+        open={!!imgPreview}
+        imgUrl={imgPreview}
+        onClose={() => setImgPreview(null)}
       />
     </main>
   );

@@ -61,17 +61,7 @@ export function InventoryTable<TData, TValue>({
     []
   );
   const [globalFilter, setGlobalFilter] = React.useState("");
-  const [warehouses, setWarehouses] = React.useState<Warehouse[]>([]);
   const t = useTranslations("Tabs");
-
-  useEffect(() => {
-    const getWarehouses = async () => {
-      const response = await fetch("/api/v2/warehouse");
-      const wh = await response.json();
-      setWarehouses(wh);
-    };
-    getWarehouses();
-  }, []);
 
   const uniqueLocations = React.useMemo(() => {
     const locations = new Set<string>();

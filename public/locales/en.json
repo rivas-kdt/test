@@ -80,7 +80,8 @@
     "transaction": "Transaction",
     "email-history": "Email History",
     "logout": "Logout",
-    "home": "Home"
+    "home": "Home",
+    "theme": "Theme"
   },
   "Table": {
     "lotNo": "Lot No.",
@@ -309,11 +310,12 @@
     "username": "Username",
     "email": "Email",
     "role": "Role",
-    "button": "Add User",
     "admin": "Admin",
     "worker": "Worker",
-    "addingState": "Save changes",
-    "loadingState": "Saving..."
+    "button": "Save changes",
+    "loadingState": "Saving...",
+    "warehouse": "Warehouse",
+    "selectWarehouse": "Select Warehouse"
   },
   "editWarehouse": {
     "header": "Edit Warehouse",

@@ -35,6 +35,7 @@ export function useTransaction() {
     setTotalLoading(true);
     try {
       const response = await getTotal();
+      console.log("Total response:", response);
       setTotal(response.current_total);
       setTotalPctChange(response.percentage_change);
     } catch (error: any) {

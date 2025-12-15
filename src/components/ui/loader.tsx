@@ -10,13 +10,13 @@ export default function Loader() {
   // Prevent hydration mismatch
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center w-full h-screen bg-background" />
+      <main className="flex items-center justify-center w-full bg-background" />
     );
   }
 
   return (
-    <div
-      className={`flex items-center justify-center w-full h-screen transition-colors duration-300 bg-background`}
+    <main
+      className={`flex items-center justify-center w-full transition-colors duration-300 bg-background`}
     >
       <div className="loader">
         {[...Array(8)].map((_, i) => (
@@ -28,6 +28,6 @@ export default function Loader() {
           <div></div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

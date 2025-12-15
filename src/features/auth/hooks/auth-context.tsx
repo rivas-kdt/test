@@ -1,165 +1,89 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import {
+import React, {
   createContext,
-  useContext,
   useState,
-  useEffect,
-  ReactNode,
+  useContext,
   useCallback,
+  useEffect,
 } from "react";
-import { login } from "../services/login";
 import { decrypt } from "@/lib/jwt";
+import { createSession, readSession, clearSession } from "@/lib/cookieHandler";
+import { login as loginService } from "../services/login";
+import { AuthSession, AuthUser } from "@/types/auth";
 import { useRouter } from "next/navigation";
-import { create, deleteSession, get } from "@/lib/cookieHandler";
-
-export interface User {
-  userId: string;
-  email: string;
-  role: string;
-  warehouse: { id: string; name: string; location: string };
-  username: string;
-}
-
-export interface Session {
-  user: User | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-}
 
 interface AuthContextType {
-  session: Session;
+  session: AuthSession;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loginError: string | null;
   loginLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-function getClientCookie(name: string) {
-  if (typeof document === "undefined") return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() ?? null;
-  return null;
-}
-
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  const [session, setSession] = useState<Session>({
+  const [session, setSession] = useState<AuthSession>({
     user: null,
-    isLoading: true,
     isAuthenticated: false,
+    isLoading: true,
   });
 
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [loginLoading, setLoginLoading] = useState<boolean>(false);
+  const [loginLoading, setLoginLoading] = useState(false);
 
+  // ------------------------------------
+  // SINGLE SESSION LOADER (fixes double login)
+  // ------------------------------------
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const token = getClientCookie("jwt");
-        if (!token) {
-          setSession({
-            user: null,
-            isLoading: false,
-            isAuthenticated: false,
-          });
-          return;
-        }
-
-        const decoded = await decrypt(token);
-        if (!decoded || !decoded.user) {
-          setSession({
-            user: null,
-            isLoading: false,
-            isAuthenticated: false,
-          });
-          return;
-        }
-
-        setSession({
-          user: decoded.user,
-          isLoading: false,
-          isAuthenticated: true,
-        });
-      } catch {
-        setSession({
-          user: null,
-          isLoading: false,
-          isAuthenticated: false,
-        });
+    async function loadSession() {
+      const token = await readSession();
+      if (!token) {
+        setSession({ user: null, isAuthenticated: false, isLoading: false });
+        return;
       }
-    };
 
-    checkSession();
+      const decoded = await decrypt(token);
+      if (!decoded?.user) {
+        setSession({ user: null, isAuthenticated: false, isLoading: false });
+        return;
+      }
+
+      setSession({
+        user: decoded.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    }
+
+    loadSession();
   }, []);
 
-  useEffect(() => {
-    const getToken = async () => {
-      try {
-        const token = await get("jwt");
-        if (!token) {
-          setSession({
-            user: null,
-            isLoading: false,
-            isAuthenticated: false,
-          });
-          return;
-        }
-
-        const decoded = await decrypt(token);
-        if (!decoded || !decoded.user) {
-          setSession({
-            user: null,
-            isLoading: false,
-            isAuthenticated: false,
-          });
-          return;
-        }
-
-        setSession({
-          user: decoded.user,
-          isLoading: false,
-          isAuthenticated: true,
-        });
-      } catch {
-        setSession({
-          user: null,
-          isLoading: false,
-          isAuthenticated: false,
-        });
-      }
-    };
-
-    getToken();
-  }, []);
-
-  const handleLogin = useCallback(
+  // ------------------------------------
+  // LOGIN FUNCTION
+  // ------------------------------------
+  const login = useCallback(
     async (username: string, password: string) => {
-      setLoginError(null);
       setLoginLoading(true);
+      setLoginError(null);
 
       try {
-        console.log(username, password);
-        const result = await login(username, password);
-        if (!result || !result.token) {
-          throw new Error("Login failed, no token received");
-        }
-        await create(result.token);
+        const result = await loginService(username, password);
+
+        await createSession(result.token);
 
         setSession({
           user: result.user,
-          isLoading: false,
           isAuthenticated: true,
+          isLoading: false,
         });
 
         router.push("/");
-      } catch (err: any) {
-        setLoginError(err?.message || "Login failed");
+      } catch (error: any) {
+        setLoginError(error?.message || "Login failed");
       } finally {
         setLoginLoading(false);
       }
@@ -167,25 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [router]
   );
 
+  // ------------------------------------
+  // LOGOUT
+  // ------------------------------------
   const logout = useCallback(async () => {
-    await deleteSession();
-    setSession({
-      user: null,
-      isLoading: false,
-      isAuthenticated: false,
-    });
+    await clearSession();
+    setSession({ user: null, isAuthenticated: false, isLoading: false });
     router.push("/login");
   }, [router]);
 
   return (
     <AuthContext.Provider
-      value={{
-        session,
-        login: handleLogin,
-        logout,
-        loginError,
-        loginLoading,
-      }}
+      value={{ session, login, logout, loginError, loginLoading }}
     >
       {children}
     </AuthContext.Provider>
@@ -193,9 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 }

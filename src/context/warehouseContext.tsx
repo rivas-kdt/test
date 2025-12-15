@@ -1,17 +1,18 @@
+// src/context/WarehouseContext.tsx
 "use client";
 
-import { useAuth } from "@/features/auth/hooks/auth-context";
-import { getWarehouse } from "@/features/landing/services/getWarehouse";
 import { createContext, useContext, useEffect, useState } from "react";
+import { getWarehouse } from "@/features/landing/services/getWarehouse";
+import { Warehouse } from "@/types/warehouse";
+import { useAuth } from "@/features/auth/hooks/auth-context";
 
 type WarehouseContextType = {
-  warehouses: any[];
-  selectedWarehouse: any | null;
+  warehouses: Warehouse[];
+  selectedWarehouse: Warehouse | null;
   warehouseId: string | null;
   location: string | null;
   loading: boolean;
-  setWarehouseId: (id: string | null) => void;
-  handleWarehouseChange: (warehouseId: string) => void;
+  handleWarehouseChange: (id: string) => void;
 };
 
 export const WarehouseContext = createContext<WarehouseContextType | null>(
@@ -23,14 +24,36 @@ export default function WarehouseProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [warehouses, setWarehouses] = useState<any[]>([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState<any>(null);
-  const [warehouseId, setWarehouseId] = useState<string | null>(null);
-  const [location, setLocation] = useState<string | null>(null);
+  const { session } = useAuth();
+  const isAdmin = session?.user?.role === "admin";
+  const assignedWarehouseId = session?.user?.warehouse?.id ?? null;
+
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(
+    null
+  );
+  const getStoredWarehouseId = () => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("warehouseId") ?? null;
+  };
+
+  const getStoredLocation = () => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("warehouseLocation") ?? null;
+  };
+
+  const [warehouseId, setWarehouseId] = useState<string | null>(
+    getStoredWarehouseId
+  );
+  const [location, setLocation] = useState<string | null>(getStoredLocation);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { session } = useAuth();
-  const selectedWarehouseId = session?.user?.warehouse?.id ?? null;
+  // Save warehouse selection persistently
+  const persist = (id: string, loc: string | null) => {
+    if (typeof window === "undefined") return;
+    sessionStorage.setItem("warehouseId", id);
+    sessionStorage.setItem("warehouseLocation", loc ?? "");
+  };
 
   useEffect(() => {
     if (session?.isAuthenticated) {
@@ -41,42 +64,54 @@ export default function WarehouseProvider({
   const fetchWarehouse = async () => {
     try {
       setLoading(true);
+      let result: Warehouse[] = [];
 
-      let response: any[] = [];
-
-      if (session?.user?.role === "admin") {
-        // admin: load all warehouses
-        response = await getWarehouse(null);
-      } else if (session?.user) {
-        // non-admin: load only assigned warehouse
-        response = await getWarehouse(selectedWarehouseId);
+      if (isAdmin) {
+        result = await getWarehouse(null);
+      } else {
+        result = await getWarehouse(assignedWarehouseId);
       }
 
-      setWarehouses(response || []);
+      setWarehouses(result);
 
-      if (response && response.length > 0) {
-        const initial = response[0];
+      // Determine initial warehouse after refresh
+      let initialWarehouse: Warehouse | undefined;
 
-        if (session?.user?.role !== "admin" && selectedWarehouseId) {
-          setWarehouseId(String(selectedWarehouseId));
-          setLocation(initial.location ?? null);
+      if (warehouseId) {
+        initialWarehouse = result.find((w) => w.id === warehouseId);
+      }
+
+      // If no persisted warehouse yet
+      if (!initialWarehouse) {
+        if (isAdmin) {
+          initialWarehouse =
+            result.find((w) => w.id === assignedWarehouseId) ?? result[0];
         } else {
-          setWarehouseId(String(initial.id));
-          setLocation(initial.location ?? null);
+          initialWarehouse = result[0];
         }
       }
-    } catch (error) {
-      console.error("Error fetching warehouses:", error);
+
+      if (initialWarehouse) {
+        setSelectedWarehouse(initialWarehouse);
+        setWarehouseId(initialWarehouse.id);
+        setLocation(initialWarehouse.location);
+        persist(initialWarehouse.id, initialWarehouse.location);
+      }
+    } catch (err) {
+      console.error("Warehouse fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleWarehouseChange = (id: string) => {
+    const selected = warehouses.find((w) => w.id === id) ?? null;
+
+    setSelectedWarehouse(selected);
     setWarehouseId(id);
-    const selected = warehouses.find((w: any) => String(w.id) === id);
-    setSelectedWarehouse(selected ?? null);
     setLocation(selected?.location ?? null);
+
+    persist(id, selected?.location ?? null);
   };
 
   return (
@@ -87,7 +122,6 @@ export default function WarehouseProvider({
         warehouseId,
         location,
         loading,
-        setWarehouseId,
         handleWarehouseChange,
       }}
     >

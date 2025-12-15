@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,131 +19,158 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRouter } from "next/navigation";
+
 import { useTranslations } from "next-intl";
-import { Users } from "@/app/(protected)/admin/page";
+import toast from "react-hot-toast";
+
+import { editUser } from "@/features/admin/services/editUser";
+import { User } from "@/types/admin";
+import { Warehouse } from "@/types/warehouse";
+import { getWarehouse } from "@/features/inventory/services/getWarehouse";
 
 interface EditUserDialogProps {
-  user: Users;
-  locations: string[];
+  user: User | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  onUserEdit: () => void;
+}
+
+interface EditUserForm {
+  username: string;
+  email: string;
+  role: "admin" | "worker";
+  warehouse_id: string;
 }
 
 export function EditUserDialog({
   user,
-  locations,
   open,
   onOpenChange,
   onSuccess,
+  onUserEdit,
 }: EditUserDialogProps) {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    role: "",
-    location: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const t = useTranslations("editUser");
 
+  const [formData, setFormData] = useState<EditUserForm>({
+    username: "",
+    email: "",
+    role: "worker",
+    warehouse_id: "",
+  });
+
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // ================================
+  // Load user data into form
+  // ================================
   useEffect(() => {
-    if (user) {
-      setFormData({
-        username: user.username || "",
-        email: user.email || "",
-        role: user.role || "",
-        location: user.location || "",
-      });
-    }
-  }, [user]);
-
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async () => {
     if (!user) return;
 
-    setIsLoading(true);
-    try {
-      const payload = {
-        userId: user.id,
-        username:
-          formData.username !== user.username ? formData.username : undefined,
-        email: formData.email !== user.email ? formData.email : undefined,
-        role: formData.role !== user.role ? formData.role : undefined,
-        location:
-          formData.location !== user.location ? formData.location : undefined,
-      };
+    setFormData({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      warehouse_id: user.warehouse_id ?? "",
+    });
+  }, [user]);
 
-      const response = await fetch("/api/v2/users", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        router.refresh();
-        onOpenChange(false);
-        onSuccess?.();
-      } else {
-        console.error("Error updating user:", result.error);
+  // ================================
+  // Load warehouse list
+  // ================================
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await getWarehouse();
+        setWarehouses(list);
+      } catch {
+        toast.error("Failed to load warehouses");
       }
-    } catch (error) {
-      console.error("Exception in handleSubmit:", error);
+    })();
+  }, []);
+
+  // ================================
+  // Field update handler
+  // ================================
+  const handleChange = useCallback(
+    (field: keyof EditUserForm, value: string) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  // ================================
+  // Submit handler
+  // ================================
+  const handleSubmit = async () => {
+    if (!user) return;
+    setLoading(true);
+
+    try {
+      const result = await editUser(user.id, formData);
+
+      if (!result.success) {
+        toast.error(result.message || t("error"));
+        return;
+      }
+
+      toast.success(t("success"));
+      onSuccess?.();
+      onUserEdit();
+      onOpenChange(false);
+    } catch {
+      toast.error(t("error"));
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   if (!user) return null;
 
+  // ================================
+  // UI
+  // ================================
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("header")}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
+
         <div className="grid gap-4 py-4">
+          {/* Username */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              {t("username")}
-            </Label>
+            <Label>{t("username")}</Label>
             <Input
-              id="username"
               value={formData.username}
               onChange={(e) => handleChange("username", e.target.value)}
               className="col-span-3"
             />
           </div>
+
+          {/* Email (locked) */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              {t("email")}
-            </Label>
+            <Label>{t("email")}</Label>
             <Input
-              id="email"
-              type="email"
               value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              className="col-span-3"
+              disabled
+              className="col-span-3 bg-muted cursor-not-allowed"
             />
           </div>
+
+          {/* Role */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="role" className="text-right">
-              {t("role")}
-            </Label>
+            <Label>{t("role")}</Label>
             <Select
               value={formData.role}
-              onValueChange={(value) => handleChange("role", value)}
+              onValueChange={(v) =>
+                handleChange("role", v as EditUserForm["role"])
+              }
             >
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select role" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="admin">{t("admin")}</SelectItem>
@@ -151,15 +178,35 @@ export function EditUserDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Warehouse */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label>{t("warehouse")}</Label>
+
+            <Select
+              value={formData.warehouse_id}
+              onValueChange={(v) => handleChange("warehouse_id", v)}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder={t("selectWarehouse")} />
+              </SelectTrigger>
+              <SelectContent>
+                {warehouses.length === 0 && (
+                  <SelectItem value="">{t("noWarehouse")}</SelectItem>
+                )}
+                {warehouses.map((w) => (
+                  <SelectItem key={w.id} value={String(w.id)}>
+                    {w.warehouse}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
         <DialogFooter>
-          <Button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="bg-amber-400 hover:bg-amber-400/75 text-black"
-          >
-            {isLoading ? t("addingState") : t("button")}
+          <Button disabled={loading} onClick={handleSubmit}>
+            {loading ? t("loadingState") : t("button")}
           </Button>
         </DialogFooter>
       </DialogContent>

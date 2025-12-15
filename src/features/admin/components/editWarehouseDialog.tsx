@@ -12,15 +12,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Warehouse } from "@/app/admin/page";
-import { useRouter } from "next/navigation";
+import { editWarehouse } from "@/features/admin/services/editWarehouse";
+import toast from "react-hot-toast";
+import { Warehouse } from "@/types/admin";
 import { useTranslations } from "next-intl";
 
 interface EditWarehouseDialogProps {
-  warehouse: Warehouse;
+  warehouse: Warehouse | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  onWarehouseEdit: () => void;
 }
 
 export function EditWarehouseDialog({
@@ -28,65 +30,40 @@ export function EditWarehouseDialog({
   open,
   onOpenChange,
   onSuccess,
+  onWarehouseEdit,
 }: EditWarehouseDialogProps) {
-  const [formData, setFormData] = useState({
-    warehouse: "",
-    location: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const t = useTranslations('editWarehouse')
+  const [formData, setFormData] = useState({ warehouse: "", location: "" });
+  const [loading, setLoading] = useState(false);
+  const t = useTranslations("editWarehouse");
 
   useEffect(() => {
     if (warehouse) {
       setFormData({
-        warehouse: warehouse.warehouse || "",
-        location: warehouse.location || "",
+        warehouse: warehouse.warehouse,
+        location: warehouse.location,
       });
     }
   }, [warehouse]);
 
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleSubmit = async () => {
     if (!warehouse) return;
+    setLoading(true);
 
-    setIsLoading(true);
     try {
-      const payload = {
-        warehouseID: warehouse.id,
-        warehouse:
-          formData.warehouse !== warehouse.warehouse
-            ? formData.warehouse
-            : undefined,
-        location:
-          formData.location !== warehouse.location
-            ? formData.location
-            : undefined,
-      };
+      const result = await editWarehouse(warehouse.id, formData);
 
-      const response = await fetch("/api/v2/warehouse", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
       if (result.success) {
-        router.refresh();
-        onOpenChange(false);
+        toast.success(t("success"));
         onSuccess?.();
+        onWarehouseEdit();
+        onOpenChange(false);
       } else {
-        console.error("Error updating warehouse:", result.error);
+        toast.error(result.message || t("error"));
       }
-    } catch (error) {
-      console.error("Exception in handleSubmit:", error);
+    } catch (err) {
+      toast.error(t("error"));
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -94,45 +71,41 @@ export function EditWarehouseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] z-50">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('header')}</DialogTitle>
-          <DialogDescription>
-            {t('description')}
-          </DialogDescription>
+          <DialogTitle>{t("header")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
+
         <div className="grid gap-4 py-4">
+          {/* Warehouse Name */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="warehouse" className="text-right">
-              {t('warehouseName')}
-            </Label>
+            <Label>{t("warehouseName")}</Label>
             <Input
-              id="warehouse"
               value={formData.warehouse}
-              onChange={(e) => handleChange("warehouse", e.target.value)}
+              onChange={(e) =>
+                setFormData({ ...formData, warehouse: e.target.value })
+              }
               className="col-span-3"
             />
           </div>
+
+          {/* Location */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="location" className="text-right">
-              {t('location')}
-            </Label>
+            <Label>{t("location")}</Label>
             <Input
-              id="location"
               value={formData.location}
-              onChange={(e) => handleChange("location", e.target.value)}
+              onChange={(e) =>
+                setFormData({ ...formData, location: e.target.value })
+              }
               className="col-span-3"
             />
           </div>
         </div>
+
         <DialogFooter>
-          <Button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="bg-amber-400 hover:bg-amber-400/75 text-black"
-          >
-            {isLoading ? t('addingState') : t('button')}
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading ? t("loadingState") : t("button")}
           </Button>
         </DialogFooter>
       </DialogContent>

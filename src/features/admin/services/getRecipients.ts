@@ -1,14 +1,18 @@
-"use server"
+"use server";
 import pool from "@/lib/db";
+import { Recipient } from "@/types/admin";
 
-export async function getRecipients() {
+export async function getRecipients(): Promise<Recipient[]> {
+  const client = await pool.connect();
   try {
-    const client = await pool.connect();
-    const result = await client.query(`SELECT * FROM recipients ORDER BY created_at DESC`);
+    const result = await client.query(`
+      SELECT id, email, isactive, created_at
+      FROM recipients
+      ORDER BY created_at DESC
+    `);
+
+    return result.rows as Recipient[];
+  } finally {
     client.release();
-    return result.rows;
-  } catch (error: any) {
-    console.error("Error fetching ship data:", error);
-    throw new Error(error.message || "Failed to fetch ship data");
   }
 }

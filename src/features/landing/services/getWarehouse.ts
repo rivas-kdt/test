@@ -1,25 +1,31 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/features/landing/services/getWarehouse.ts
 "use server";
-import pool from "@/lib/db";
 
-export async function getWarehouse(warehouseId: string | null) {
+import pool from "@/lib/db";
+import { Warehouse } from "@/types/warehouse";
+
+export async function getWarehouse(
+  warehouseId?: string | null
+): Promise<Warehouse[]> {
   try {
     const client = await pool.connect();
+
+    let result;
     if (warehouseId) {
-      const result = await client.query(
+      result = await client.query(
         `SELECT id, warehouse, location FROM warehouse WHERE id=$1`,
         [warehouseId]
       );
-      client.release();
-      return result.rows;
+    } else {
+      result = await client.query(
+        `SELECT id, warehouse, location FROM warehouse`
+      );
     }
-    const result = await client.query(
-      `SELECT id, warehouse, location FROM warehouse`
-    );
+
     client.release();
     return result.rows;
   } catch (error: any) {
-    console.error("Error fetching ship data:", error);
-    throw new Error(error.message || "Failed to fetch ship data");
+    console.error("Error fetching warehouse data:", error);
+    throw new Error(error.message ?? "Failed to fetch warehouse data");
   }
 }

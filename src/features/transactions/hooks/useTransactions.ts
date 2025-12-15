@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import { getTransactions } from "../services/getTransactions";
+import { Transaction } from "@/types/transaction";
 
 export function useTransactionHooks() {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      const response = await getTransactions();
-      setTransactions(response);
-      setLoading(false);
-    } catch (error) {
-      setError((error as Error).message || "Failed to fetch transactions");
+      const data = await getTransactions();
+      setTransactions(data);
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to fetch transactions");
+    } finally {
       setLoading(false);
     }
   };
@@ -22,9 +23,5 @@ export function useTransactionHooks() {
     fetchTransactions();
   }, []);
 
-  return {
-    transactions,
-    loading,
-    error,
-  };
+  return { transactions, loading, error };
 }

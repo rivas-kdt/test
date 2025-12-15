@@ -1,16 +1,23 @@
 "use server";
 import pool from "@/lib/db";
+import { Warehouse } from "@/types/admin";
 
-export async function getWarehouse() {
+export async function getWarehouse(): Promise<Warehouse[]> {
+  const client = await pool.connect();
   try {
-    const client = await pool.connect();
-    const result = await client.query(
-      `SELECT id, warehouse, location FROM warehouse`
-    );
+    const result = await client.query(`
+      SELECT
+        id,
+        warehouse,
+        location,
+        0::int AS workers,
+        created_at
+      FROM warehouse
+      ORDER BY created_at DESC
+    `);
+
+    return result.rows as Warehouse[];
+  } finally {
     client.release();
-    return result.rows;
-  } catch (error: any) {
-    console.error("Error fetching ship data:", error);
-    throw new Error(error.message || "Failed to fetch ship data");
   }
 }

@@ -9,8 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -20,37 +20,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useStockActions } from "@/features/stock/hooks/useStockHooks";
+
 import { ArrowLeft, Camera, Trash2, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useStockActions } from "@/features/stock/hooks/useStockHooks";
 
 export default function StockView() {
   const t = useTranslations("stock/ship");
 
-  // Hook gives us everything
   const {
     scanning,
     setScanning,
     scannedItems,
     receipt,
     fileInputRef,
+    fileQRInputRef,
     loading,
     handleScan,
     handleQuantityChange,
     handleUploadReceipt,
     handleStockItems,
+    handleUploadQRImage,
   } = useStockActions();
 
-  // For manual QR simulation
-  const [simulateDialog, setSimulateDialog] = useState(false);
-  const [simulatedQR, setSimulatedQR] = useState("");
-
   return (
-    <div className="flex flex-col w-screen p-4 pt-20 bg-gradient-to-b from-primary/10 to-background">
-      {/* Back Button */}
+    <div className="flex flex-col w-screen p-4 pt-20">
       <Link href="/">
         <Button variant="ghost" size="icon">
           <ArrowLeft className="h-6 w-6" />
@@ -59,69 +56,43 @@ export default function StockView() {
 
       <h1 className="text-xl font-bold ml-2 mb-2">{t("stock-items")}</h1>
 
-      {/* Scanner + Simulation Controls */}
+      {/* Scanner */}
       {scanning ? (
         <Card className="mb-4">
-          <CardContent className="p-.5">
+          <CardContent className="p-1">
             <QrScanner onScan={handleScan} onClose={() => setScanning(false)} />
           </CardContent>
         </Card>
       ) : (
-        <div className="flex gap-2 w-full mb-4">
+        <>
           <Button
+            className="w-full h-[50px] mb-4 bg-primary"
             onClick={() => setScanning(true)}
-            className="bg-primary text-md w-full h-[50px]"
           >
             <Camera className="mr-2" />
             {t("scanqr")}
           </Button>
-
-          {/* Manual simulation button */}
-          {/* <Button
-            variant="outline"
-            className="h-[50px] w-full"
-            onClick={() => setSimulateDialog(true)}
-          >
-            Simulate QR
-          </Button> */}
-        </div>
-      )}
-
-      {/* Simulate QR Dialog */}
-      {/* <Dialog open={simulateDialog} onOpenChange={setSimulateDialog}>
-        <DialogContent className="max-w-md">
-          <DialogTitle>Simulate QR Scan</DialogTitle>
-          <p className="text-sm text-muted-foreground mb-2">
-            Paste a QR value here (comma-separated):
-          </p>
-
-          <Input
-            placeholder="e.g. TEST,PCODE,XYZ,STOCK,Description,LOT123,10"
-            value={simulatedQR}
-            onChange={(e) => setSimulatedQR(e.target.value)}
-            className="mb-4"
-          />
-
           <Button
-            className="w-full"
-            onClick={() => {
-              if (!simulatedQR.trim()) {
-                toast.error("Enter QR data");
-                return;
-              }
-              handleScan(simulatedQR.trim());
-              setSimulateDialog(false);
-              setSimulatedQR("");
-            }}
+            variant="outline"
+            className="bg-secondary text-md w-full h-[50px]"
+            onClick={() => fileQRInputRef.current?.click()}
           >
-            Apply
+            Upload QR Image
           </Button>
-        </DialogContent>
-      </Dialog> */}
+
+          <input
+            ref={fileQRInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleUploadQRImage}
+          />
+        </>
+      )}
 
       {/* Scanned Items Table */}
       <div className="relative max-h-[500px] overflow-auto">
-        <Table className="w-full">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>{t("lotNo")}</TableHead>
@@ -143,11 +114,11 @@ export default function StockView() {
                   <Input
                     type="number"
                     min="1"
+                    className="w-20"
                     value={item.quantity}
                     onChange={(e) =>
                       handleQuantityChange(item.id, e.target.value)
                     }
-                    className="w-20"
                   />
                 </TableCell>
               </TableRow>
@@ -156,49 +127,46 @@ export default function StockView() {
         </Table>
       </div>
 
-      {/* Upload hidden input */}
+      {/* Hidden file input */}
       <input
+        ref={fileInputRef}
         type="file"
         accept="image/*"
-        ref={fileInputRef}
         className="hidden"
         onChange={handleUploadReceipt}
       />
 
-      {/* Upload Button */}
+      {/* Upload Receipt Button */}
       {!receipt && (
         <Button
-          className="bg-primary mt-4 mb-4 h-[50px] w-full"
+          className="w-full h-[50px] mt-4 bg-primary"
           onClick={() => fileInputRef.current?.click()}
         >
-          <Upload className="mr-2" /> {t("upload")}
+          <Upload className="mr-2" />
+          {t("upload")}
         </Button>
       )}
 
-      {/* Receipt Preview */}
+      {/* Receipt Image Preview */}
       {receipt && (
-        <Card className="my-4 relative">
-          <CardContent className="p-4 flex items-start justify-between">
+        <Card className="relative my-4">
+          <CardContent className="p-4">
             <Dialog>
               <DialogTrigger asChild>
                 <img
                   src={receipt}
-                  alt="Receipt"
-                  className="max-h-48 object-contain cursor-zoom-in mx-auto"
+                  className="max-h-48 object-contain cursor-zoom-in"
                 />
               </DialogTrigger>
 
               <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
                 <VisuallyHidden>
-                  <DialogTitle>View Receipt</DialogTitle>
+                  <DialogTitle>Receipt</DialogTitle>
                 </VisuallyHidden>
 
                 <TransformWrapper>
                   <TransformComponent>
-                    <img
-                      src={receipt}
-                      className="max-w-full max-h-full object-contain"
-                    />
+                    <img src={receipt} className="max-w-full max-h-full" />
                   </TransformComponent>
                 </TransformWrapper>
               </DialogContent>
@@ -210,6 +178,7 @@ export default function StockView() {
               className="absolute top-4 right-4"
               onClick={() => {
                 sessionStorage.removeItem("receiptImage");
+                toast.success("Removed receipt");
                 window.location.reload();
               }}
             >
@@ -219,15 +188,14 @@ export default function StockView() {
         </Card>
       )}
 
-      {/* Final Submit Button */}
+      {/* Final Submit */}
       <Button
-        onClick={handleStockItems}
         disabled={loading || scannedItems.length === 0 || !receipt}
-        className="w-full h-[50px] mt-4 bg-primary"
+        onClick={handleStockItems}
+        className="w-full h-[50px] bg-primary"
       >
         {loading ? t("processing") : t("stock")}
       </Button>
-      {/* <button onClick={handleStockItems}>Stock</button> */}
     </div>
   );
 }

@@ -1,91 +1,122 @@
 "use server";
-import pool from "@/lib/db";
 
-export async function stockParts(
-  lot_no: any,
-  stock_no: any,
-  product_code: any,
-  description: any,
-  quantity: any,
-  warehouse_id: any,
-  receipt_url: any
-) {
+import pool from "@/lib/db";
+import { StockItemPayload } from "@/types/stock";
+
+/**
+ * Stock (Add/Update) inventory for a scanned part.
+ *
+ * Logic:
+ * - If part doesn't exist → create new part, assign location, create inventory
+ * - If part exists → update inventory quantity
+ * - Always record transaction history & image
+ */
+export async function stockParts(payload: StockItemPayload) {
+  const {
+    lotNo,
+    stockNo,
+    productCode,
+    description,
+    quantity,
+    warehouseId,
+    receiptUrl,
+  } = payload;
+
   const client = await pool.connect();
 
   try {
-    const partsResult = await client.query(
-      `SELECT * FROM parts WHERE lot_no = $1`,
-      [lot_no]
+    // ---------------------------
+    // 1. Check if part exists
+    // ---------------------------
+    const partResult = await client.query(
+      `SELECT lot_no FROM parts WHERE lot_no = $1`,
+      [lotNo]
     );
 
-    const isNew = partsResult.rows.length === 0;
+    const isNewPart = partResult.rowCount === 0;
 
-    if (isNew) {
+    // ---------------------------
+    // 2. Insert NEW part + mapping + inventory
+    // ---------------------------
+    if (isNewPart) {
       await client.query(
-        `INSERT INTO parts (lot_no, stock_no, product_code, description)
-         VALUES ($1, $2, $3, $4)
-         RETURNING *`,
-        [lot_no, stock_no, product_code, description]
+        `
+        INSERT INTO parts (lot_no, stock_no, product_code, description)
+        VALUES ($1, $2, $3, $4)
+      `,
+        [lotNo, stockNo, productCode, description]
       );
 
       await client.query(
-        `INSERT INTO parts_location (lot_no, warehouse_id)
-         VALUES ($1, $2)`,
-        [lot_no, warehouse_id]
+        `
+        INSERT INTO parts_location (lot_no, warehouse_id)
+        VALUES ($1, $2)
+      `,
+        [lotNo, warehouseId]
       );
 
       await client.query(
-        `INSERT INTO inventory (lot_no, quantity)
-         VALUES ($1, $2)`,
-        [lot_no, quantity]
-      );
-
-      const res = await client.query(
-        `INSERT INTO transaction_history (lot_no, status, quantity)
-   VALUES ($1, $2, $3) RETURNING id`,
-        [lot_no, "stocked", quantity]
-      );
-
-      await client.query(
-        `INSERT INTO transaction_image (id, "imgUrl") VALUES ($1, $2)`,
-        [res.rows[0].id, receipt_url]
-      );
-      return { message: "New part added and stocked.", error: null };
-    }
-
-    const inventory = await client.query(
-      `SELECT quantity FROM inventory WHERE lot_no = $1`,
-      [lot_no]
-    );
-
-    if (inventory.rows.length > 0) {
-      const newQty = Number(inventory.rows[0].quantity) + Number(quantity);
-
-      await client.query(
-        `UPDATE inventory SET quantity = $1 WHERE lot_no = $2`,
-        [newQty, lot_no]
-      );
-    } else {
-      await client.query(
-        `INSERT INTO inventory (lot_no, quantity)
-        VALUES ($1, $2)`,
-        [lot_no, quantity]
+        `
+        INSERT INTO inventory (lot_no, quantity)
+        VALUES ($1, $2)
+      `,
+        [lotNo, quantity]
       );
     }
 
-    const res = await client.query(
-      `INSERT INTO transaction_history (lot_no, status, quantity)
-   VALUES ($1, $2, $3) RETURNING id`,
-      [lot_no, "stocked", quantity]
+    // ---------------------------
+    // 3. Update inventory for existing part
+    // ---------------------------
+    if (!isNewPart) {
+      const inv = await client.query(
+        `SELECT quantity FROM inventory WHERE lot_no = $1`,
+        [lotNo]
+      );
+
+      if (inv.rowCount > 0) {
+        const newQty = Number(inv.rows[0].quantity) + Number(quantity);
+
+        await client.query(
+          `UPDATE inventory SET quantity = $1 WHERE lot_no = $2`,
+          [newQty, lotNo]
+        );
+      } else {
+        // part exists but no inventory record — create one
+        await client.query(
+          `INSERT INTO inventory (lot_no, quantity) VALUES ($1, $2)`,
+          [lotNo, quantity]
+        );
+      }
+    }
+
+    // ---------------------------
+    // 4. Add transaction history + image
+    // ---------------------------
+    const history = await client.query(
+      `
+      INSERT INTO transaction_history (lot_no, status, quantity)
+      VALUES ($1, 'stocked', $2)
+      RETURNING id
+    `,
+      [lotNo, quantity]
     );
 
     await client.query(
-      `INSERT INTO transaction_image (id, "imgUrl") VALUES ($1, $2)`,
-      [res.rows[0].id, receipt_url]
+      `
+      INSERT INTO transaction_image (id, "imgUrl")
+      VALUES ($1, $2)
+    `,
+      [history.rows[0].id, receiptUrl]
     );
 
-    return { message: "Part stocked successfully.", error: null };
+    return {
+      message: isNewPart
+        ? "New part added and stocked."
+        : "Part stocked successfully.",
+      error: null,
+    };
   } catch (err: any) {
+    console.error("StockParts error:", err);
     return { message: null, error: err.message };
   } finally {
     client.release();
