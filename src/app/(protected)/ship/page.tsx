@@ -64,7 +64,7 @@ export default function ShippedView() {
 
   return (
     <ScrollArea className="h-screen">
-      <div className="flex flex-col w-screen p-4 pt-20">
+      <div className="flex flex-col w-screen px-4 pt-20 bg-linear-to-b from-primary/10 to-background">
         {/* Back Button */}
         <Link href="/">
           <Button

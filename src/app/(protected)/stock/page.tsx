@@ -47,9 +47,13 @@ export default function StockView() {
   } = useStockActions();
 
   return (
-    <div className="flex flex-col w-screen p-4 pt-20">
+    <div className="flex flex-col w-screen px-4 pt-20 bg-linear-to-b from-primary/10 to-background">
       <Link href="/">
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="active:bg-primary transition"
+        >
           <ArrowLeft className="h-6 w-6" />
         </Button>
       </Link>
@@ -74,10 +78,11 @@ export default function StockView() {
           </Button>
           <Button
             variant="outline"
-            className="bg-secondary text-md w-full h-[50px]"
+            className="bg-secondary w-full h-[50px]"
             onClick={() => fileQRInputRef.current?.click()}
           >
-            Upload QR Image
+            <img src="./qr-file.svg" className="w-4 h-4 mr-1.5" />
+            {t("uploadqr")}
           </Button>
 
           <input
@@ -139,7 +144,7 @@ export default function StockView() {
       {/* Upload Receipt Button */}
       {!receipt && (
         <Button
-          className="w-full h-[50px] mt-4 bg-primary"
+          className="w-full h-[50px] mb-4 mt-4 bg-primary"
           onClick={() => fileInputRef.current?.click()}
         >
           <Upload className="mr-2" />

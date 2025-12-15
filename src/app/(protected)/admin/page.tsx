@@ -177,7 +177,7 @@ export default function AdminPage() {
 
   return (
     <ProtectedRoute>
-      <main className="p-4 gap-2">
+      <main className="p-4 gap-2 bg-linear-to-b from-primary/10 to-background">
         <Tabs defaultValue="users" className="space-y-1">
           <TabsList className=" bg-card w-full flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <TabsTrigger value="users">{t("users")}</TabsTrigger>

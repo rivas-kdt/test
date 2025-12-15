@@ -154,6 +154,7 @@
     "ship-items": "出庫部品",
     "ship": "出庫",
     "scanqr": "QRコードをスキャン",
+    "uploadqr": "QR画像をアップロード",
     "upload": "送付状のアップロード",
     "addToShip": "選択済みを出庫に追加",
     "ship-title1": "入庫済み部品",

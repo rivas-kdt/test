@@ -38,7 +38,7 @@ const TransactionMobile = () => {
     );
 
   return (
-    <main className="fixed flex flex-col w-screen p-4 pt-2 overflow-y-auto">
+    <main className="fixed flex flex-col w-screen p-4 pt-2 overflow-y-auto bg-linear-to-b from-primary/10 to-background">
       <Button variant="ghost" size="icon" onClick={() => router.back()}>
         <ArrowLeft className="h-6 w-6" />
       </Button>

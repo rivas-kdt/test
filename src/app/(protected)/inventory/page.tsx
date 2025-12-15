@@ -56,7 +56,7 @@ export default function InventoryPage() {
 
   return (
     <ProtectedRoute>
-      <main className="p-4">
+      <main className="p-4 gap-2 bg-linear-to-b from-primary/10 to-background">
         <InventoryTable
           columns={columns}
           data={inventory}

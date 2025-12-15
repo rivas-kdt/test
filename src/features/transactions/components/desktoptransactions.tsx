@@ -86,7 +86,7 @@ const TransactionDesktop = () => {
   if (loading) return <Loader />;
 
   return (
-    <main className="p-4 flex flex-col">
+    <main className="p-4 flex flex-col bg-linear-to-b from-primary/10 to-background">
       <TransactionTable
         columns={columns}
         data={transactions}
