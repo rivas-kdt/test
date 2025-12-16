@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getMonthlyTransaction } from "../services/getMonthlyInventory";
 import { getTotal } from "../services/getTotal";
+import { useTranslations } from "next-intl";
 
 export function useTransaction() {
   const [monthly, setMonthly] = useState<any>(null);
@@ -12,6 +13,8 @@ export function useTransaction() {
   const [totalPctChange, setTotalPctChange] = useState();
   const [totalLoading, setTotalLoading] = useState(true);
   const [totalError, setTotalError] = useState(null);
+
+  const t = useTranslations("DashboardPage");
 
   useEffect(() => {
     fetchMonthlyInventory();
@@ -25,7 +28,7 @@ export function useTransaction() {
       setMonthly(response);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
-      setMonthlyError(error.message || "Failed to fetch overview data");
+      setMonthlyError(error.message || t("failedFetchOverview"));
     } finally {
       setTLoading(false);
     }
@@ -40,7 +43,7 @@ export function useTransaction() {
       setTotalPctChange(response.percentage_change);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
-      setTotalError(error.message || "Failed to fetch overview data");
+      setTotalError(error.message || t("failedFetchOverview"));
     } finally {
       setTotalLoading(false);
     }

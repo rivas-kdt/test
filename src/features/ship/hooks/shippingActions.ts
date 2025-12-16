@@ -24,7 +24,7 @@ export function useShippingActions({
     try {
       const values = data.split(",");
       if (values.length < 6) {
-        toast.error("Invalid QR code format");
+        toast.error(t("invalidQR"));
         return;
       }
       const scannedLotNo = values[5];
@@ -54,7 +54,7 @@ export function useShippingActions({
       });
     } catch (error) {
       console.error("Error processing QR code:", error);
-      toast.error("Failed to process the scanned QR code");
+      toast.error(t("scanError"));
     }
   };
 

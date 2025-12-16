@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { getWarehouse } from "../services/getWarehouse";
 import { getWarehouseInvnentory } from "../services/getWarehouseInventory";
+import { useTranslations } from "next-intl";
 
 interface WarehouseInventory {
   warehouse: string;
@@ -25,6 +26,8 @@ export function useWarehouse() {
   const [warehouseLoading, setWarehouseLoading] = useState(true);
   const [warehouseError, setWarehouseError] = useState<string | null>(null);
 
+  const t = useTranslations("DashboardPage");
+
   const fetchWarehouseInventory = async () => {
     setInventoryLoading(true);
     try {
@@ -32,7 +35,7 @@ export function useWarehouse() {
       setWarehouseInventory(response);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
-      setInventoryError(error.message || "Failed to fetch shipped data");
+      setInventoryError(error.message || t("failedFetchShip"));
     } finally {
       setInventoryLoading(false);
     }
@@ -45,7 +48,7 @@ export function useWarehouse() {
       setWarehouse(response);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
-      setWarehouseError(error.message || "Failed to fetch shipped data");
+      setWarehouseError(error.message || t("failedFetchShip"));
     } finally {
       setWarehouseLoading(false);
     }

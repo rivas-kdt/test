@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { getRecentStocked } from "../services/getRecentStocked";
 import { getStock } from "../services/getStock";
+import { useTranslations } from "next-intl";
 
 export function useStock() {
   const [stockedThisMonth, setStockedThisMonth] = useState(0);
@@ -15,6 +16,8 @@ export function useStock() {
     null
   );
 
+  const t = useTranslations("DashboardPage");
+
   const fetchRecentStocked = async () => {
     setRecentStockedLoading(true);
     try {
@@ -22,7 +25,7 @@ export function useStock() {
       setRecentStocked(response);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
-      setRecentStockedError(error.message || "Failed to fetch overview data");
+      setRecentStockedError(error.message || t("failedFetchOverview"));
     } finally {
       setRecentStockedLoading(false);
     }
@@ -36,7 +39,7 @@ export function useStock() {
       setStockedLastMonth(response.prev_months_total);
       setStockedPercentageChange(response.percentage_change);
     } catch (error: any) {
-      setStockedError(error.message || "Failed to fetch stocked data");
+      setStockedError(error.message || t("failedFetchStock"));
     } finally {
       setStockedLoading(false);
     }

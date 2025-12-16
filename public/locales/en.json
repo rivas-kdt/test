@@ -41,7 +41,10 @@
     "failedStockData": "Failed to load stocked data",
     "failedInventoryData": "Failed to load inventory data",
     "failedStockList": "Failed to load stocked list",
-    "failedShipList": "Failed to load shipped list"
+    "failedShipList": "Failed to load shipped list",
+    "failedFetchOverview": "Failed to fetch overview data",
+    "failedFetchStock": "Failed to fetch stocked data",
+    "failedFetchShip": "Failed to fetch shipped data"
   },
   "LocaleSwitcher": {
     "jp": "日本語",
@@ -204,7 +207,21 @@
     "failedToShipParts": "Failed to ship out the parts",
     "noWarehouseID": "Warehouse ID not found in session storage",
     "noStockedForWarehouse": "No stocked parts found for the given warehouse",
-    "failedFetchForWarehouse": "Failed to fetch stocked parts"
+    "failedFetchForWarehouse": "Failed to fetch stocked parts",
+
+    "canvasContextErr": "Canvas context not available",
+    "noQR": "Cannot detect QR code in the uploaded image.",
+    "qrDecoded": "QR image decoded!",
+    "qrReadFail": "Failed to read QR from image.",
+    "qrFormatErr": "QR code format is incorrect.",
+    "qrParsingErr": "QR parsing error",
+    "noWarehouse": "Warehouse not selected",
+    "scanItem": "Scan at least one item",
+    "uploadReceipt": "Upload a receipt",
+    "qtyInvalid": "Invalid quantity detected",
+    "receiptFail": "Receipt upload failed",
+    "stockSuccess": "Items stocked successfully",
+    "stockError": "Error stocking items"
   },
   "transaction-page": {
     "title": "Transactions",
@@ -220,7 +237,8 @@
     "no-warehouse": "Unknown Warehouse",
     "no-transactions": "No transactions found",
     "error-transactions": "Error fetching transactions",
-    "searchby": "Search by Lot No..."
+    "searchby": "Search by Lot No...",
+    "fetchFailed": "Failed to fetch transactions"
   },
   "email-history": {
     "title": "Email History",

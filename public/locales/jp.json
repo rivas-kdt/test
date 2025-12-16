@@ -41,7 +41,10 @@
     "failedStockData": "入庫データの読み込みに失敗しました",
     "failedInventoryData": "在庫データの読み込みに失敗しました",
     "failedStockList": "入庫リストの読み込みに失敗しました",
-    "failedShipList": "出荷リストの読み込みに失敗しました"
+    "failedShipList": "出荷リストの読み込みに失敗しました",
+    "failedFetchOverview": "概要データの取得に失敗しました。",
+    "failedFetchStock": "入庫データの取得に失敗しました。",
+    "failedFetchShip": "出荷データの取得に失敗しました。"
   },
   "LocaleSwitcher": {
     "jp": "日本語",
@@ -206,7 +209,21 @@
     "failedToShipParts": "部品の出荷に失敗しました。",
     "noWarehouseID": "セッションストレージに倉庫IDが見つかりません。",
     "noStockedForWarehouse": "指定された倉庫に在庫部品が見つかりません。",
-    "failedFetchForWarehouse": "倉庫の在庫部品の取得に失敗しました。"
+    "failedFetchForWarehouse": "倉庫の在庫部品の取得に失敗しました。",
+
+    "canvasContextErr": "キャンバスコンテキストが利用できません。",
+    "noQR": "アップロードした画像からQRコードを検出できませんでした。",
+    "qrDecoded": "QRコード画像の読み取りに成功しました。",
+    "qrReadFail": "画像からQRコードを読み取れませんでした。",
+    "qrFormatErr": "QRコードの形式が正しくありません。",
+    "qrParsingErr": "QRコードの解析中にエラーが発生しました。",
+    "noWarehouse": "倉庫が選択されていません。",
+    "scanItem": "少なくとも1つのアイテムをスキャンしてください。",
+    "uploadReceipt": "領収書をアップロードしてください。",
+    "qtyInvalid": "無効な数量が検出されました。",
+    "receiptFail": "領収書のアップロードに失敗しました。",
+    "stockSuccess": "アイテムが正常に入庫されました。",
+    "stockError": "アイテムの入庫中にエラーが発生しました。"
   },
   "transaction-page": {
     "title": "取引履歴",
@@ -222,7 +239,8 @@
     "no-warehouse": "不明な倉庫",
     "no-transactions": "取引が見つかりません",
     "error-transactions": "取引データの取得中にエラーが発生しました。",
-    "searchby": "ロット番号で検索..."
+    "searchby": "ロット番号で検索...",
+    "fetchFailed": "取引データの取得に失敗しました。"
   },
   "email-history": {
     "title": "メール履歴",

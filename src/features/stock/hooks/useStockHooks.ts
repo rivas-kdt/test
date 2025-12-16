@@ -6,6 +6,7 @@ import { ScannedItem, StockItemPayload } from "@/types/stock";
 import { v4 as uuidv4 } from "uuid";
 import { useWarehouse } from "@/context/warehouseContext";
 import jsQR from "jsqr";
+import { useTranslations } from "next-intl";
 
 export function useStockActions() {
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
@@ -17,6 +18,8 @@ export function useStockActions() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileQRInputRef = useRef<HTMLInputElement>(null);
   const { warehouseId } = useWarehouse();
+
+  const t = useTranslations("stock/ship");
 
   const handleUploadQRImage = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -33,7 +36,7 @@ export function useStockActions() {
       // Draw onto canvas so jsQR can read it
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("Canvas context not available");
+      if (!ctx) throw new Error(t("canvasContextErr"));
 
       canvas.width = img.width;
       canvas.height = img.height;
@@ -44,15 +47,15 @@ export function useStockActions() {
       const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
 
       if (!qrCode) {
-        toast.error("Cannot detect QR code in the uploaded image.");
+        toast.error(t("noQR"));
         return;
       }
 
-      toast.success("QR image decoded!");
+      toast.success(t("qrDecoded"));
       handleScan(qrCode.data); // <-- same flow as live camera scan
     } catch (err) {
       console.error("QR image decode error:", err);
-      toast.error("Failed to read QR from image.");
+      toast.error(t("qrReadFail"));
     } finally {
       if (fileQRInputRef.current) fileQRInputRef.current.value = "";
     }
@@ -67,7 +70,7 @@ export function useStockActions() {
     try {
       const values = data.split(",");
       if (values.length < 6) {
-        toast.error("QR code format is incorrect.");
+        toast.error(t("qrFormatErr"));
         return;
       }
 
@@ -81,9 +84,9 @@ export function useStockActions() {
       };
 
       setScannedItems((prev) => [...prev, item]);
-      toast.success(`Added item: ${item.lotNo}`);
+      toast.success(`${t("addedItem")}: ${item.lotNo}`);
     } catch (error) {
-      toast.error("QR parsing error");
+      toast.error(t("qrParsingErr"));
     }
 
     setScanning(false);
@@ -127,22 +130,22 @@ export function useStockActions() {
   // -----------------------------
   const handleStockItems = async () => {
     if (!warehouseId) {
-      toast.error("Warehouse not selected");
+      toast.error(t("noWarehouse"));
       return;
     }
 
     if (scannedItems.length === 0) {
-      toast.error("Scan at least one item");
+      toast.error(t("scanItem"));
       return;
     }
 
     if (!receiptFile) {
-      toast.error("Upload a receipt");
+      toast.error(t("uploadReceipt"));
       return;
     }
 
     if (scannedItems.some((i) => i.quantity < 1)) {
-      toast.error("Invalid quantity detected");
+      toast.error(t("qtyInvalid"));
       return;
     }
 
@@ -158,7 +161,7 @@ export function useStockActions() {
         .upload(`receipts/${fileName}`, receiptFile);
 
       if (uploadErr) {
-        toast.error("Receipt upload failed");
+        toast.error(t("receiptFail"));
         return;
       }
 
@@ -187,7 +190,7 @@ export function useStockActions() {
         }
       }
 
-      toast.success("Items stocked successfully");
+      toast.success(t("stockSuccess"));
 
       // reset
       setScannedItems([]);
@@ -195,7 +198,7 @@ export function useStockActions() {
       setReceiptFile(null);
       sessionStorage.removeItem("receiptImage");
     } catch (error) {
-      toast.error("Error stocking items");
+      toast.error(t("stockError"));
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { getRecentShipped } from "../services/getRecentShipped";
 import { getShip } from "../services/getShip";
+import { useTranslations } from "next-intl";
 
 export function useShip() {
   const [shippedThisMonth, setShippedThisMonth] = useState(0);
@@ -15,6 +16,8 @@ export function useShip() {
     null
   );
 
+  const t = useTranslations("DashboardPage");
+
   const fetchRecentShipped = async () => {
     setRecentShippedLoading(true);
     try {
@@ -22,7 +25,7 @@ export function useShip() {
       setRecentShipped(response);
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
-      setRecentShippedError(error.message || "Failed to fetch overview data");
+      setRecentShippedError(error.message || t("failedFetchOverview"));
     } finally {
       setRecentShippedLoading(false);
     }
@@ -36,7 +39,7 @@ export function useShip() {
       setShippedLastMonth(response.prev_months_total);
       setShippedPercentageChange(response.percentage_change);
     } catch (error: any) {
-      setShippedError(error.message || "Failed to fetch shipped data");
+      setShippedError(error.message || t("failedFetchShip"));
     } finally {
       setShippedLoading(false);
     }
