@@ -64,7 +64,7 @@ export function AddRecipientForm({
       }
     } catch (error) {
       console.error("Error adding recipient: ", error);
-      toast.error("An Unexpected error occurred");
+      toast.error(t("unexptectedError"));
     } finally {
       setLoading(false);
     }

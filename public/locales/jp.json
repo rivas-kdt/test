@@ -290,14 +290,17 @@
     "worker": "担当者",
     "addingState": "追加中...",
     "loadingState": "読み込み中...",
-    "selectWarehouse": "最初に倉庫を選択してください"
+    "selectWarehouse": "最初に倉庫を選択してください",
+    "userAdded": "ユーザーが正常に追加されました。",
+    "errorAdding": "ユーザーの追加中にエラーが発生しました。"
   },
   "addNewRecipient": {
     "header": "メールの受信者を追加する",
     "description": "在庫通知の電子メール受信者を追加または削除します。",
     "email": "電子メール",
     "button": "受信者を追加",
-    "addingState": "追加中..."
+    "addingState": "追加中...",
+    "unexpectedError": "予期しないエラーが発生しました。"
   },
   "addNewWarehouse": {
     "header": "新しい倉庫を追加",
@@ -305,7 +308,8 @@
     "warehouseName": "倉庫名",
     "button": "倉庫の追加",
     "addingState": "追加中...",
-    "location": "場所"
+    "location": "場所",
+    "unexpectedError": "予期しないエラーが発生しました。"
   },
   "editUser": {
     "header": "ユーザーを編集",
@@ -333,7 +337,8 @@
     "allFieldsRequired": "すべてのフィールドは必須です",
     "emailInvalid": "無効なメールアドレス",
     "userExists": "ユーザーはすでに存在します",
-    "fallbackError": "ユーザーの追加中にエラーが発生しました。もう一度お試しください。"
+    "fallbackError": "ユーザーの追加中にエラーが発生しました。もう一度お試しください。",
+    "emailReq": "メールアドレスは必須です。"
   },
   "addWarehouse": {
     "errorRequired": "倉庫名と所在地は必須です",
@@ -342,11 +347,14 @@
   },
   "addRecipient": {
     "emailError": "メールアドレスは必須です",
+    "emailInvalid": "無効なメールアドレス",
+    "addSuccess": "受信者が正常に登録されました。",
     "fallbackError": "受信者の追加中にエラーが発生しました。もう一度お試しください。"
   },
   "loginFunction": {
     "userNotFound": "ユーザーが見つかりません",
     "incorrectPassword": "パスワードが間違っています",
+    "warehouseAdded": "倉庫の追加が完了しました。",
     "fallbackError": "ログイン中にエラーが発生しました。もう一度お試しください。"
   }
 }

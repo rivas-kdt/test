@@ -94,13 +94,18 @@ export function AddUserForm({
         role,
         warehouseId
       );
-      setTimeout(() => {
-        toast.success(`User added successfully: ${result}`);
-      }, 0);
+      // setTimeout(() => {
+      toast.success(`${t("userAdded")}: ${result}`);
+      // }, 0);
       onUserAdded?.();
       resetForm();
       onOpenChange(false);
     } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? `${t("errorAdding")}: ${error.message}`
+          : t("errorAdding")
+      );
       console.error("Error adding user:", error);
     } finally {
       setLoading(false);

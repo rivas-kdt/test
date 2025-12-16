@@ -16,7 +16,7 @@ export async function addUser(
     const client = await pool.connect();
 
     if (!email) {
-      throw new Error("Email is required");
+      throw new Error(t("emailReq"));
     }
 
     if (!username || !email || !password || !role) {
@@ -46,9 +46,11 @@ export async function addUser(
     );
     const userId = result.rows[0].id;
 
+    const wid = warehouseId || "bba7e018-cf8d-443d-9ca7-bff0395955ff";
+
     await client.query(
       `INSERT INTO worker_location (user_id, warehouse_id) VALUES ($1, $2)`,
-      [userId, warehouseId]
+      [userId, wid]
     );
 
     client.release();

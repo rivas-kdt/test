@@ -58,7 +58,7 @@ export function AddWarehouseForm({
       }
     } catch (error) {
       console.error("Error adding warehouse: ", error);
-      toast.error("An Unexpected error occurred");
+      toast.error(t("unexpectedError"));
     } finally {
       setLoading(false);
     }

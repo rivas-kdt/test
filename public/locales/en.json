@@ -288,14 +288,17 @@
     "worker": "Worker",
     "addingState": "Adding...",
     "loadingState": "Loading...",
-    "selectWarehouse": "Select Warehouse"
+    "selectWarehouse": "Select Warehouse",
+    "userAdded": "User added successfully",
+    "errorAdding": "Error adding user"
   },
   "addNewRecipient": {
     "header": "Email Recipients",
     "description": "Add or remove email recipients for inventory notifications.",
     "email": "Email",
     "button": "Add Recipient",
-    "addingState": "Adding..."
+    "addingState": "Adding...",
+    "unexpectedError": "An Unexpected error occurred"
   },
   "addNewWarehouse": {
     "header": "Add New Warehouse",
@@ -303,7 +306,8 @@
     "warehouseName": "Warehouse Name",
     "button": "Add Warehouse",
     "addingState": "Adding...",
-    "location": "Location"
+    "location": "Location",
+    "unexpectedError": "An Unexpected error occurred"
   },
   "editUser": {
     "header": "Add New User",
@@ -330,7 +334,8 @@
     "allFieldsRequired": "All fields are required",
     "emailInvalid": "Email is invalid",
     "userExists": "User already exists",
-    "fallbackError": "An error occurred while adding the user. Please try again."
+    "fallbackError": "An error occurred while adding the user. Please try again.",
+    "emailReq": "Email is required"
   },
   "addWarehouse": {
     "errorRequired": "Warehouse name and location are required",
@@ -339,11 +344,14 @@
   },
   "addRecipient": {
     "emailError": "Email is required",
+    "emailInvalid": "Email is invalid",
+    "addSuccess": "Recipient added successfully",
     "fallbackError": "An error occurred while adding the recipient. Please try again."
   },
   "loginFunction": {
     "userNotFound": "User not found",
     "incorrectPassword": "Incorrect password",
+    "warehouseAdded": "Warehouse added successfully",
     "fallbackError": "An error occurred while logging in. Please try again."
   }
 }

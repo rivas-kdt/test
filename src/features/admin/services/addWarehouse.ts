@@ -30,7 +30,7 @@ export async function addWarehouse(warehouseName: string, location: string) {
 
     client.release();
 
-    return { success: true, message: "Warehouse added successfully" };
+    return { success: true, message: t("warehouseAdded") };
     // return result.rows[0];
   } catch (error: any) {
     const fallbackError = t("fallbackError");

@@ -13,7 +13,7 @@ export async function addRecipient(email: string) {
     }
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      const errorMessage = "Email is invalid";
+      const errorMessage = t("emailInvalid");
       return { success: false, error: errorMessage };
       // throw new Error(errorMessage);
     }
@@ -24,7 +24,7 @@ export async function addRecipient(email: string) {
     );
 
     client.release();
-    return { success: true, message: "Recipient added successfully" };
+    return { success: true, message: t("addSuccess") };
   } catch (error: any) {
     const fallbackError = t("fallbackError");
     // throw new Error(error.message || fallbackError);
