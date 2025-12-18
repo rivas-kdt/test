@@ -14,7 +14,10 @@ export async function getWarehouseWorkers(): Promise<Warehouse[]> {
         w.created_at
       FROM warehouse w
       LEFT JOIN worker_location wl ON w.id = wl.warehouse_id
-      GROUP BY w.id
+      GROUP BY w.id,
+      w.warehouse,
+      w.location,
+      w.created_at
       ORDER BY w.created_at DESC
     `);
 
